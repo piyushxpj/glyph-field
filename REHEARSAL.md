@@ -76,3 +76,13 @@ See `POLISH.md` for the review table and motion verdict. This pass supersedes th
 - Added color-conversion, hue-wrap, brightness, and wheel-boundary checks; TypeScript and JavaScript checks pass.
 - No physical-device or separate-browser run was performed. The wheel's pointer capture supports touch, and the sliders provide keyboard alternatives.
 - Export validation completed: 1638 × 2048 PNG contains 10,461 blue accent pixels; SVG metadata and text fills contain #22aaff with no embedded bitmaps.
+
+## Independent background and glyph colors
+
+- Added a separate Colors section with background, glyph, and accent controls. All use the shared accessible wheel/hex picker with unique field IDs.
+- Existing saved states and history without the new fields load the original charcoal background and pale glyph defaults; saved accents remain intact.
+- Verified cream background #f3eee3 and navy glyphs #283b56 with the existing violet accent #b980e8. All three survive reload and restore together from history.
+- Reset texture preserves colors. Reset colors restores only the palette. Keyboard Escape restores focus to the correct picker trigger.
+- Checked the new controls at 390 px with no horizontal overflow; desktop controls and artwork inspected at 1280 × 900.
+- SVG background rectangles, glyph/mark colors, accent fills, and metadata follow the chosen palette; accent cutout rectangles use the selected background.
+- Exported both SVG and PNG for palette verification. Browser warning/error logs: none. TypeScript, JavaScript, color utility tests, and production build pass.

@@ -12,7 +12,8 @@ A fast, offline studio for generating organic ASCII artwork. Open `index.html` i
 - Click **New composition** (**New** on mobile) or press **Space** outside a control for a fresh composition.
 - Adjust form scale, coverage, glyph size, and letter-mark quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.
 - Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn preview motion off. Motion feedback honors the system reduced-motion preference. Artwork accent controls remain beneath the texture controls.
-- Choose Monochrome, Violet, Sage, Ember, or Ice for the artwork accent. The **+** button opens a custom color wheel with hue, saturation, brightness, and six-digit hex entry. Arrow keys also operate the wheel and sliders. Colors persist in settings and history.
+- Set **Background color** and **Glyph color** independently in the Colors section. Both offer the same color wheel, brightness controls, and hex entry. Glyphs retain subtle tonal variation for texture. **Reset colors** resets the whole palette; **Reset texture** leaves colors alone.
+- Choose Monochrome, Violet, Sage, Ember, or Ice for the artwork accent. The **+** button opens a custom color wheel with hue, saturation, brightness, and six-digit hex entry. Arrow keys also operate the wheel and sliders. All three colors persist in settings and history and are included in PNG/SVG exports. Older saved compositions receive the original background and glyph defaults.
 - The interface branding stays black and white; artwork colors are independent.
 - Pick portrait, square, landscape, or story format.
 - Choose **PNG** or **SVG** beside **Export** in the toolbar. The format choice is remembered.

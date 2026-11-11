@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular'};
   const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes'};
-  const defaults = {form:'mycelium',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',ratio:'4:5',resolution:2048};
+  const defaults = {form:'mycelium',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',ratio:'4:5',resolution:2048};
   let state = {...defaults}, history = [], timer, revision = 0, exportFormat = 'png';
   const art = $('art');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -85,6 +85,7 @@
   }
   function sizeFor(ratio,longest) {const [w,h]=ratio.split(':').map(Number);return w>=h?[longest,Math.round(longest*h/w)]:[Math.round(longest*w/h),longest];}
   function escapeXML(value) {return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[ch]));}
+  function shade(color,factor){return '#'+[1,3,5].map(i=>Math.round(parseInt(color.slice(i,i+2),16)*factor).toString(16).padStart(2,'0')).join('');}
   function render(canvas,s,longest=1500,vector=false) {
     const start=performance.now();
     const [lw,lh]=sizeFor(s.ratio,1500),[w,h]=sizeFor(s.ratio,longest);
@@ -95,7 +96,7 @@
       if(vector)parts.push(`<rect x="${number(x)}" y="${number(y)}" width="${number(width)}" height="${number(height)}" fill="${color}"/>`);
       else{ctx.fillStyle=color;ctx.fillRect(x,y,width,height);}
     }
-    rect(0,0,lw,lh,'#181818');
+    rect(0,0,lw,lh,s.background);
     const seed=hash(s.seed),rnd=random(seed),noise=noiseFactory(seed),short=Math.min(lw,lh);
     const freq=2.2+(90-s.scale)*.051,step=s.detail*.72,cols=Math.ceil(lw/step)+2,rows=Math.ceil(lh/step)+2;
     const mask=new Uint8Array(cols*rows),values=new Float32Array(cols*rows),edges=[];
@@ -133,7 +134,7 @@
       if(vector){parts.push(`<text x="${number(x)}" y="${number(y+.25)}" font-size="${number(size)}" font-weight="${size>step*1.3?600:500}" fill="${color}">${escapeXML(ch)}</text>`);return;}
       const {tile,box}=stamp(ch,size,color);ctx.drawImage(tile,x-box/2,y-box/2,box,box);
     }
-    const shades=['#c2c2c2','#d0d0d0','#dbdbdb'];
+    const shades=[shade(s.glyph,194/219),shade(s.glyph,208/219),s.glyph],edgeColor=shade(s.glyph,215/219),markColor=shade(s.glyph,168/219);
     for(let y=1;y<rows-1;y++)for(let x=1;x<cols-1;x++){
       const i=y*cols+x;if(!mask[i])continue;
       const px=(x-1)*step,py=(y-1)*step;
@@ -142,8 +143,8 @@
       if(edge){
         edges.push([px,py]);
         const ex=px+(rnd()-.5)*step*.5,ey=py+(rnd()-.5)*step*.5;
-        glyph('⊗',ex,ey,step*1.95,'#d7d7d7');
-        glyph('@',ex,ey,step*1.5,'#d7d7d7');
+        glyph('⊗',ex,ey,step*1.95,edgeColor);
+        glyph('@',ex,ey,step*1.5,edgeColor);
       } else {
         const ch=texture>.27?'×':texture>.02?'+':texture>-.2?'⁙':'✣';
         if(rnd()>.025)glyph(ch,px,py,step*(ch==='×'?1.48:ch==='✣'?1.04:1.22),shades[Math.min(2,Math.max(0,Math.floor((texture+1)*1.5)))]);
@@ -154,10 +155,10 @@
       const x=20+rnd()*(lw-40),y=20+rnd()*(lh-40);
       if(field(x,y)>-.055)continue;
       if(n%3===0){
-        if(vector)parts.push(`<path d="M${number(x-7)} ${number(y)}h14 M${number(x)} ${number(y-7)}v14" fill="none" stroke="#a8a8a8" stroke-width="1.2"/>`);
-        else{ctx.strokeStyle='#a8a8a8';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x-7,y);ctx.lineTo(x+7,y);ctx.moveTo(x,y-7);ctx.lineTo(x,y+7);ctx.stroke();}
+        if(vector)parts.push(`<path d="M${number(x-7)} ${number(y)}h14 M${number(x)} ${number(y-7)}v14" fill="none" stroke="${markColor}" stroke-width="1.2"/>`);
+        else{ctx.strokeStyle=markColor;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x-7,y);ctx.lineTo(x+7,y);ctx.moveTo(x,y-7);ctx.lineTo(x,y+7);ctx.stroke();}
       }
-      else if(n%3===1){for(let j=0;j<4;j++)for(let i=0;i<4;i++){if(field(x+i*17,y+j*17)<-.05&&rnd()>.12)rect(x+i*17,y+j*17,2,2,'#adadad');}}
+      else if(n%3===1){for(let j=0;j<4;j++)for(let i=0;i<4;i++){if(field(x+i*17,y+j*17)<-.05&&rnd()>.12)rect(x+i*17,y+j*17,2,2,shade(s.glyph,173/219));}}
     }
     // Oversized, repeated letter fragments make the occasional typographic glitch.
     const letters='ssttrreewwxxllkkaaoohh';
@@ -168,7 +169,7 @@
       for(let j=0;j<length;j++)for(let k=0;k<(vertical?2:1);k++){
         const gx=x+(vertical?k:j)*size*.67,gy=y+(vertical?j:k)*size*.95;
         if(gx>lw-10||gy>lh-10)continue;
-        rect(gx-size*.33,gy-size*.5,size*.68,size,'#181818');
+        rect(gx-size*.33,gy-size*.5,size*.68,size,s.background);
         glyph(ch,gx,gy,size,s.color);
       }
     }
@@ -198,7 +199,7 @@
     $('seed').value=state.seed;$('ratio').value=state.ratio;$('resolution').value=state.resolution;
     document.querySelectorAll('.form').forEach(b=>{const on=b.dataset.form===state.form;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on);});
     positionSelection();
-    $('accent-color').value=state.color;
+    $('accent-color').value=state.color;$('background-color').value=state.background;$('glyph-color').value=state.glyph;
     $('structure-description').textContent=descriptions[state.form];
     $('art-title').textContent=names[state.form];$('seed-display').textContent=state.seed;
     $('dimensions').textContent=sizeFor(state.ratio,state.resolution).join(' × ');
@@ -235,12 +236,12 @@
   function draw(save=true){
     if(tuneFrame){cancelAnimationFrame(tuneFrame);tuneFrame=0;}
     revision++;sync();const ms=render(art,state);$('render-status').textContent=`Rendered in ${ms} ms`;
-    art.setAttribute('aria-label',`${names[state.form]}: organic ASCII artwork, seed ${state.seed}, with pale glyphs and ${state.color} accents on charcoal.`);
+    art.setAttribute('aria-label',`${names[state.form]}: organic ASCII artwork, seed ${state.seed}, with ${state.glyph} glyphs, ${state.color} accents, and a ${state.background} background.`);
     if(save)remember();else{showHistory();persist();}
   }
   function generate(){clearTimeout(timer);const a=new Uint32Array(1);crypto.getRandomValues(a);state.seed=String(a[0]%1000000).padStart(6,'0');draw();}
   document.querySelectorAll('.form').forEach(b=>b.addEventListener('click',()=>{clearTimeout(timer);state.form=b.dataset.form;draw();}));
-  $('accent-color').addEventListener('change',()=>{state.color=$('accent-color').value;draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
+  for(const [id,key] of [['accent-color','color'],['background-color','background'],['glyph-color','glyph']])$(id).addEventListener('change',()=>{state[key]=$(id).value;draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
   $('ratio').addEventListener('change',()=>{state.ratio=$('ratio').value;draw();});
   $('resolution').addEventListener('change',()=>{state.resolution=Number($('resolution').value);sync();persist();});
   $('export-format').addEventListener('change',()=>{exportFormat=$('export-format').value;persist();});
@@ -248,7 +249,8 @@
   $('apply-seed').addEventListener('click',applySeed);$('seed').addEventListener('keydown',e=>{if(e.key==='Enter')applySeed();});
   $('generate').addEventListener('click',generate);
   $('generate-quick').addEventListener('click',generate);
-  $('reset').addEventListener('click',()=>{clearTimeout(timer);for(const k of ['scale','density','detail','accent','color'])state[k]=defaults[k];draw();});
+  $('reset').addEventListener('click',()=>{clearTimeout(timer);for(const k of ['scale','density','detail','accent'])state[k]=defaults[k];draw();});
+  $('reset-colors').addEventListener('click',()=>{clearTimeout(timer);for(const key of ['background','glyph','color'])state[key]=defaults[key];draw();});
   document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.defaultPrevented&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!document.activeElement.closest('.dialkit-root,[contenteditable="true"],[role="listbox"],[role="menu"],[role="dialog"]')&&!['INPUT','SELECT','TEXTAREA','BUTTON','A'].includes(document.activeElement.tagName)){e.preventDefault();generate();}});
   let exportFeedbackTimer;
   $('download').addEventListener('click',async()=>{
@@ -269,14 +271,14 @@
     }catch(error){button.dataset.state='idle';$('render-status').textContent='Export failed. Please try again.';console.error(error);}
     finally{button.disabled=false;formatControl.disabled=false;button.removeAttribute('aria-busy');button.setAttribute('aria-label','Export artwork');if(restoreFocus&&document.activeElement===document.body)button.focus({preventScroll:true});exportFeedbackTimer=setTimeout(()=>{button.dataset.state='idle';},1600);}
   });
-  function valid(s){return s&&names[s.form]&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
-  try{const saved=JSON.parse(localStorage.getItem('glyph-field-v1'));if(valid(saved?.state))state={...saved.state};if(['png','svg'].includes(saved?.exportFormat))exportFormat=saved.exportFormat;
+  function valid(s){return s&&names[s.form]&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
+  try{const saved=JSON.parse(localStorage.getItem('glyph-field-v1'));if(valid(saved?.state))state={...defaults,...saved.state};if(['png','svg'].includes(saved?.exportFormat))exportFormat=saved.exportFormat;
     const savedMotion=saved?.motionSettings,t=savedMotion?.transition;
     if(typeof savedMotion?.enabled==='boolean'&&t&&['spring','easing'].includes(t.type)){
       const numericKeys=['visualDuration','bounce','stiffness','damping','mass','duration'];
       if(numericKeys.every(k=>t[k]===undefined||Number.isFinite(t[k]))&&(t.type!=='easing'||(Number.isFinite(t.duration)&&Array.isArray(t.ease)&&t.ease.length===4&&t.ease.every(Number.isFinite))))motionSettings={enabled:savedMotion.enabled,transition:t};
     }
-    if(Array.isArray(saved?.history)){for(const s of saved.history.slice(0,8)){if(!valid(s))continue;if(history.some(entry=>key(entry.state)===key(s)))continue;render(art,s,300);history.push({state:s,image:thumbnail()});}}
+    if(Array.isArray(saved?.history)){for(const s of saved.history.slice(0,8)){if(!valid(s))continue;const restored={...defaults,...s};if(history.some(entry=>key(entry.state)===key(restored)))continue;render(art,restored,300);history.push({state:restored,image:thumbnail()});}}
   }catch{/* Fresh state is always usable. */}
   $('export-format').value=exportFormat;
   mountDials();

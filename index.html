@@ -31,8 +31,14 @@
       </section>
       <section class="texture" aria-label="Live texture and motion controls">
         <div id="dial-panel"></div>
-        <input id="accent-color" type="hidden" value="#eeeeee"><div id="palette"></div>
         <div id="reset-control"></div>
+      </section>
+      <section aria-label="Artwork colors" class="artwork-colors">
+        <div class="section-heading"><h2>Colors</h2><span>Artwork only</span></div>
+        <input id="background-color" type="hidden" value="#181818"><div id="background-picker"></div>
+        <input id="glyph-color" type="hidden" value="#dbdbdb"><div id="glyph-picker"></div>
+        <input id="accent-color" type="hidden" value="#eeeeee"><div id="palette"></div>
+        <div id="reset-colors-control"></div>
       </section>
       <section><div class="section-heading"><h2>Canvas</h2></div><div class="canvas-options"><div class="canvas-option"><span class="field-label">Ratio</span><select id="ratio" hidden aria-hidden="true" tabindex="-1"><option value="4:5">Portrait · 4:5</option><option value="1:1">Square · 1:1</option><option value="16:9">Landscape · 16:9</option><option value="9:16">Story · 9:16</option></select><div id="ratio-select"></div></div><div class="canvas-option"><span class="field-label">Export size</span><select id="resolution" hidden aria-hidden="true" tabindex="-1"><option value="2048">2K · 2048 px</option><option value="4096">4K · 4096 px</option></select><div id="resolution-select"></div></div></div>
         <label class="seed-label" for="seed">Seed <span>Repeat a composition</span></label><div class="seed-wrap"><input id="seed" value="781204" maxlength="24" spellcheck="false" aria-label="Composition seed"><span id="seed-apply"></span></div>

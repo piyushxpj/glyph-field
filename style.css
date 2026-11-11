@@ -279,3 +279,15 @@ html[data-input="keyboard"] *, html[data-input="keyboard"] *::before, html[data-
   .color-slider-row > div { margin-bottom: 0; }
   .hex-row { margin-top: 10px; padding-top: 10px; }
 }
+.compact-color-control { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+.compact-color-control .accent-heading { white-space: nowrap; }
+.compact-color-control .color-presets { margin: 0; flex: 0 0 130px; }
+.color-value-trigger { display: flex; align-items: center; justify-content: flex-start; gap: 8px; width: 130px; padding: 0 9px; height: 34px; }
+.trigger-color { width: 15px; height: 15px; border-radius: 3px; border: 1px solid #ffffff38; flex: none; }
+.trigger-hex { font: 11px monospace; color: #d4d4d4; }
+.color-value-trigger > svg { margin-left: auto; color: #a3a3a3; }
+.artwork-colors > #palette .accent-control { margin-top: 18px; }
+@media(max-width:700px) {
+  .color-value-trigger { height: 44px; width: 140px; }
+  .compact-color-control .color-presets { flex-basis: 140px; }
+}
