@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "dialkit": "^2.2.0",
+    "motion": "^14.12.0"
+  },
+  "name": "glyph-field",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline organic ASCII image studio",
+  "scripts": {
+    "build": "node scripts/sync-vendor.mjs",
+    "check": "node --check app.js",
+    "start": "python3 -m http.server 4187 --bind 127.0.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/piyushxpj/glyph-field.git"
+  }
+}
