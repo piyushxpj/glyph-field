@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular'};
   const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes'};
-  const defaults = {form:'mycelium',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',ratio:'4:5',resolution:2048};
+  const defaults = {form:'mycelium',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048};
   let state = {...defaults}, history = [], timer, revision = 0, exportFormat = 'png';
   const art = $('art');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -96,7 +96,7 @@
       if(vector)parts.push(`<rect x="${number(x)}" y="${number(y)}" width="${number(width)}" height="${number(height)}" fill="${color}"/>`);
       else{ctx.fillStyle=color;ctx.fillRect(x,y,width,height);}
     }
-    rect(0,0,lw,lh,s.background);
+    if(!s.transparent)rect(0,0,lw,lh,s.background);
     const seed=hash(s.seed),rnd=random(seed),noise=noiseFactory(seed),short=Math.min(lw,lh);
     const freq=2.2+(90-s.scale)*.051,step=s.detail*.72,cols=Math.ceil(lw/step)+2,rows=Math.ceil(lh/step)+2;
     const mask=new Uint8Array(cols*rows),values=new Float32Array(cols*rows),edges=[];
@@ -161,7 +161,8 @@
       else if(n%3===1){for(let j=0;j<4;j++)for(let i=0;i<4;i++){if(field(x+i*17,y+j*17)<-.05&&rnd()>.12)rect(x+i*17,y+j*17,2,2,shade(s.glyph,173/219));}}
     }
     // Oversized, repeated letter fragments make the occasional typographic glitch.
-    const letters='ssttrreewwxxllkkaaoohh';
+    const letters='ssttrreewwxxllkkaaoohh',cutouts=[],accentGlyphs=[];
+    let transparentDefs='';
     for(let n=0;n<Math.round(s.accent*.68);n++){
       if(!edges.length)break;
       const [x,y]=edges[Math.floor(rnd()*edges.length)],size=step*(1.8+rnd()*.6),ch=letters[Math.floor(rnd()*letters.length)];
@@ -169,11 +170,23 @@
       for(let j=0;j<length;j++)for(let k=0;k<(vertical?2:1);k++){
         const gx=x+(vertical?k:j)*size*.67,gy=y+(vertical?j:k)*size*.95;
         if(gx>lw-10||gy>lh-10)continue;
-        rect(gx-size*.33,gy-size*.5,size*.68,size,s.background);
-        glyph(ch,gx,gy,size,s.color);
+        if(s.transparent){cutouts.push([gx-size*.33,gy-size*.5,size*.68,size]);accentGlyphs.push([ch,gx,gy,size]);}
+        else{rect(gx-size*.33,gy-size*.5,size*.68,size,s.background);glyph(ch,gx,gy,size,s.color);}
       }
     }
-    // A low-opacity grain tile and a vignette soften the digital grid.
+    if(s.transparent){
+      // Knock out the glyph field before drawing accents. No colored backplates.
+      if(vector&&cutouts.length){
+        const holes=cutouts.map(([x,y,w,h])=>`<rect x="${number(x)}" y="${number(y)}" width="${number(w)}" height="${number(h)}" fill="#000"/>`).join('');
+        transparentDefs=`<defs><mask id="accent-cutouts" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" x="0" y="0" width="${lw}" height="${lh}" style="mask-type:luminance"><rect width="${lw}" height="${lh}" fill="#fff"/>${holes}</mask></defs>`;
+        const field=parts.join('');parts.length=0;parts.push(`<g mask="url(#accent-cutouts)">${field}</g>`);
+      }else if(!vector){for(const [x,y,w,h] of cutouts)ctx.clearRect(x,y,w,h);}
+      for(const [ch,x,y,size] of accentGlyphs)glyph(ch,x,y,size,s.color);
+    }
+    const svgDocument=defs=>`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${lw} ${lh}" overflow="hidden"><title>${escapeXML(names[s.form]+' — '+s.seed)}</title><desc>Glyph Field artwork. Editable text and vector shapes; glyph appearance depends on the installed monospace font.</desc><metadata>${escapeXML(JSON.stringify(s))}</metadata>${defs}<g font-family="monospace" text-anchor="middle" dominant-baseline="central">${parts.join('')}</g></svg>`;
+    // Full-surface grain/vignette would tint empty pixels, so omit them in alpha mode.
+    if(s.transparent)return vector?svgDocument(transparentDefs):Math.round(performance.now()-start);
+    // A low-opacity grain tile and a vignette soften the opaque background.
     if(vector){
       // Reuse the exact grain samples as vector paths in a repeating pattern.
       const grainPaths=Array.from({length:20},()=>[]);
@@ -184,7 +197,7 @@
       const grain=grainPaths.map((paths,i)=>paths.length?`<path fill="${i>=10?'#fff':'#000'}" fill-opacity="${number((i%10)/255)}" d="${paths.join('')}"/>`:'').join('');
       const defs=`<defs><pattern id="grain" width="160" height="160" patternUnits="userSpaceOnUse">${grain}</pattern><radialGradient id="vignette" gradientUnits="userSpaceOnUse" cx="${lw*.5}" cy="${lh*.5}" r="${Math.max(lw,lh)*.72}" fx="${lw*.5}" fy="${lh*.45}" fr="${short*.1}"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="${37/255}"/></radialGradient></defs>`;
       parts.push(`<rect width="${lw}" height="${lh}" fill="url(#grain)"/><rect width="${lw}" height="${lh}" fill="url(#vignette)"/>`);
-      return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${lw} ${lh}" overflow="hidden"><title>${escapeXML(names[s.form]+' — '+s.seed)}</title><desc>Glyph Field artwork. Editable text and vector shapes; glyph appearance depends on the installed monospace font.</desc><metadata>${escapeXML(JSON.stringify(s))}</metadata>${defs}<g font-family="monospace" text-anchor="middle" dominant-baseline="central">${parts.join('')}</g></svg>`;
+      return svgDocument(defs);
     }
     const grain=document.createElement('canvas');grain.width=grain.height=160;
     const gc=grain.getContext('2d'),pixels=gc.createImageData(160,160);
@@ -200,6 +213,8 @@
     document.querySelectorAll('.form').forEach(b=>{const on=b.dataset.form===state.form;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on);});
     positionSelection();
     $('accent-color').value=state.color;$('background-color').value=state.background;$('glyph-color').value=state.glyph;
+    $('transparent-background').checked=state.transparent;$('background-color').disabled=state.transparent;
+    art.parentElement.classList.toggle('is-transparent',state.transparent);
     $('structure-description').textContent=descriptions[state.form];
     $('art-title').textContent=names[state.form];$('seed-display').textContent=state.seed;
     $('dimensions').textContent=sizeFor(state.ratio,state.resolution).join(' × ');
@@ -208,7 +223,9 @@
   }
   function persist(){try{localStorage.setItem('glyph-field-v1',JSON.stringify({state,exportFormat,motionSettings,history:history.map(e=>e.state)}));}catch{/* Private browsing can disable storage. */}}
   function key(s){const {resolution,...visual}=s;return JSON.stringify(visual);}
-  function thumbnail(){const c=document.createElement('canvas');c.width=144;c.height=Math.round(144*art.height/art.width);c.getContext('2d').drawImage(art,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.72);}
+  function fitChecker(){const ratio=art.width/art.height,width=Math.min(art.clientWidth,art.clientHeight*ratio);$('transparency-grid').style.width=width+'px';$('transparency-grid').style.height=width/ratio+'px';}
+  new ResizeObserver(fitChecker).observe(art);
+  function thumbnail(transparent=state.transparent){const c=document.createElement('canvas');c.width=144;c.height=Math.round(144*art.height/art.width);c.getContext('2d').drawImage(art,0,0,c.width,c.height);return transparent?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.72);}
   const historyButtons=new Map();
   function showHistory(){
     const container=$('history'),visible=new Set(history.map(entry=>key(entry.state)));
@@ -217,7 +234,7 @@
     history.forEach((entry,index)=>{
       const id=key(entry.state);let button=historyButtons.get(id);
       if(!button){
-        button=document.createElement('button');button.className='history-item';
+        button=document.createElement('button');button.className='history-item';button.dataset.transparent=String(!!entry.state.transparent);
         button.title=`${names[entry.state.form]} · ${entry.state.seed}`;
         button.setAttribute('aria-label',`Restore ${names[entry.state.form]} seed ${entry.state.seed}`);
         const img=document.createElement('img');img.src=entry.image;img.alt='';
@@ -235,13 +252,14 @@
   function remember(){const k=key(state);const existing=history.find(e=>key(e.state)===k);if(!existing)history.unshift({state:{...state},image:thumbnail()});history=history.slice(0,8);showHistory();persist();}
   function draw(save=true){
     if(tuneFrame){cancelAnimationFrame(tuneFrame);tuneFrame=0;}
-    revision++;sync();const ms=render(art,state);$('render-status').textContent=`Rendered in ${ms} ms`;
-    art.setAttribute('aria-label',`${names[state.form]}: organic ASCII artwork, seed ${state.seed}, with ${state.glyph} glyphs, ${state.color} accents, and a ${state.background} background.`);
+    revision++;sync();const ms=render(art,state);fitChecker();$('render-status').textContent=`Rendered in ${ms} ms`;
+    art.setAttribute('aria-label',`${names[state.form]}: organic ASCII artwork, seed ${state.seed}, with ${state.glyph} glyphs, ${state.color} accents, and a ${state.transparent?'transparent':state.background} background.`);
     if(save)remember();else{showHistory();persist();}
   }
   function generate(){clearTimeout(timer);const a=new Uint32Array(1);crypto.getRandomValues(a);state.seed=String(a[0]%1000000).padStart(6,'0');draw();}
   document.querySelectorAll('.form').forEach(b=>b.addEventListener('click',()=>{clearTimeout(timer);state.form=b.dataset.form;draw();}));
   for(const [id,key] of [['accent-color','color'],['background-color','background'],['glyph-color','glyph']])$(id).addEventListener('change',()=>{state[key]=$(id).value;draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
+  $('transparent-background').addEventListener('change',()=>{clearTimeout(timer);state.transparent=$('transparent-background').checked;draw();});
   $('ratio').addEventListener('change',()=>{state.ratio=$('ratio').value;draw();});
   $('resolution').addEventListener('change',()=>{state.resolution=Number($('resolution').value);sync();persist();});
   $('export-format').addEventListener('change',()=>{exportFormat=$('export-format').value;persist();});
@@ -250,7 +268,7 @@
   $('generate').addEventListener('click',generate);
   $('generate-quick').addEventListener('click',generate);
   $('reset').addEventListener('click',()=>{clearTimeout(timer);for(const k of ['scale','density','detail','accent'])state[k]=defaults[k];draw();});
-  $('reset-colors').addEventListener('click',()=>{clearTimeout(timer);for(const key of ['background','glyph','color'])state[key]=defaults[key];draw();});
+  $('reset-colors').addEventListener('click',()=>{clearTimeout(timer);for(const key of ['background','glyph','color','transparent'])state[key]=defaults[key];draw();});
   document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.defaultPrevented&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!document.activeElement.closest('.dialkit-root,[contenteditable="true"],[role="listbox"],[role="menu"],[role="dialog"]')&&!['INPUT','SELECT','TEXTAREA','BUTTON','A'].includes(document.activeElement.tagName)){e.preventDefault();generate();}});
   let exportFeedbackTimer;
   $('download').addEventListener('click',async()=>{
@@ -265,20 +283,20 @@
         const canvas=document.createElement('canvas');render(canvas,exportState,exportState.resolution);
         blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG encoding failed');
       }
-      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`glyph-field-${exportState.form}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`glyph-field-${exportState.form}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
       button.dataset.state='done';button.setAttribute('aria-label','Exported artwork');
-      if(revision===exportRevision)$('render-status').textContent=format.toUpperCase()+' exported · '+(format==='svg'?'Scalable vector':sizeFor(exportState.ratio,exportState.resolution).join(' × '));
+      if(revision===exportRevision)$('render-status').textContent=format.toUpperCase()+' exported · '+(exportState.transparent?'Transparent · ':'')+(format==='svg'?'Scalable vector':sizeFor(exportState.ratio,exportState.resolution).join(' × '));
     }catch(error){button.dataset.state='idle';$('render-status').textContent='Export failed. Please try again.';console.error(error);}
     finally{button.disabled=false;formatControl.disabled=false;button.removeAttribute('aria-busy');button.setAttribute('aria-label','Export artwork');if(restoreFocus&&document.activeElement===document.body)button.focus({preventScroll:true});exportFeedbackTimer=setTimeout(()=>{button.dataset.state='idle';},1600);}
   });
-  function valid(s){return s&&names[s.form]&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
+  function valid(s){return s&&names[s.form]&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&(s.transparent===undefined||typeof s.transparent==='boolean')&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
   try{const saved=JSON.parse(localStorage.getItem('glyph-field-v1'));if(valid(saved?.state))state={...defaults,...saved.state};if(['png','svg'].includes(saved?.exportFormat))exportFormat=saved.exportFormat;
     const savedMotion=saved?.motionSettings,t=savedMotion?.transition;
     if(typeof savedMotion?.enabled==='boolean'&&t&&['spring','easing'].includes(t.type)){
       const numericKeys=['visualDuration','bounce','stiffness','damping','mass','duration'];
       if(numericKeys.every(k=>t[k]===undefined||Number.isFinite(t[k]))&&(t.type!=='easing'||(Number.isFinite(t.duration)&&Array.isArray(t.ease)&&t.ease.length===4&&t.ease.every(Number.isFinite))))motionSettings={enabled:savedMotion.enabled,transition:t};
     }
-    if(Array.isArray(saved?.history)){for(const s of saved.history.slice(0,8)){if(!valid(s))continue;const restored={...defaults,...s};if(history.some(entry=>key(entry.state)===key(restored)))continue;render(art,restored,300);history.push({state:restored,image:thumbnail()});}}
+    if(Array.isArray(saved?.history)){for(const s of saved.history.slice(0,8)){if(!valid(s))continue;const restored={...defaults,...s};if(history.some(entry=>key(entry.state)===key(restored)))continue;render(art,restored,300);history.push({state:restored,image:thumbnail(restored.transparent)});}}
   }catch{/* Fresh state is always usable. */}
   $('export-format').value=exportFormat;
   mountDials();

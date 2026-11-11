@@ -29,6 +29,12 @@ function StudioSelect({ target, label, className = '' }: {target: string; label:
     </SelectContent>
   </Select>;
 }
+function TransparencyControl() {
+  const native=document.getElementById('transparent-background') as HTMLInputElement;
+  const [checked,setChecked]=useState(native.checked);
+  useEffect(()=>{const sync=()=>setChecked(native.checked);document.addEventListener('glyph-field:sync',sync);return ()=>document.removeEventListener('glyph-field:sync',sync);},[native]);
+  return <div className="transparency-control"><div><span id="transparency-label">Transparent background</span><p>PNG & SVG exports</p></div><Button variant="ghost" role="switch" aria-labelledby="transparency-label" aria-checked={checked} className="transparency-switch" onClick={()=>{native.checked=!checked;setChecked(native.checked);native.dispatchEvent(new Event('change',{bubbles:true}));}}><span/></Button></div>;
+}
 function Toolbar() {
   return <>
     <Button id="generate" variant="outline" className="generate"><Shuffle aria-hidden="true"/>New composition<kbd>Space</kbd></Button>
@@ -49,6 +55,7 @@ function mount(id: string, element: React.ReactNode) {
 }
 mount('toolbar', <Toolbar/>);
 mount('palette', <ColorPicker/>);
+mount('transparency-control', <TransparencyControl/>);
 mount('background-picker', <ColorPicker kind="background"/>);
 mount('glyph-picker', <ColorPicker kind="glyph"/>);
 mount('reset-colors-control', <Button id="reset-colors" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset colors</Button>);

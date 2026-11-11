@@ -291,3 +291,23 @@ html[data-input="keyboard"] *, html[data-input="keyboard"] *::before, html[data-
   .color-value-trigger { height: 44px; width: 140px; }
   .compact-color-control .color-presets { flex-basis: 140px; }
 }
+.transparency-control { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.transparency-control span { font-size: 11px; }
+.transparency-control p { margin: 4px 0 0; font-size: 10px; color: #a3a3a3; }
+.transparency-switch { width: 34px; min-width: 34px; height: 20px; padding: 2px; border: 1px solid #555; border-radius: 12px; background: #333; display: block; }
+.transparency-switch > span { display: block; width: 14px; height: 14px; border-radius: 50%; background: #d4d4d4; transition: transform 120ms var(--ease-out); }
+.transparency-switch[aria-checked="true"] { background: #eee; border-color: #eee; }
+.transparency-switch[aria-checked="true"] > span { transform: translateX(14px); background: #222; }
+.color-control-disabled { opacity: .45; }
+.art-stage { position: relative; }
+#art { position: relative; z-index: 1; }
+#transparency-grid { display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); }
+.art-stage.is-transparent #transparency-grid { display: block; }
+#transparency-grid, .history-item[data-transparent="true"] img { background-color: #bcbcbc; background-image: conic-gradient(#dedede 25%,transparent 0 50%,#dedede 0 75%,transparent 0); background-size: 16px 16px; }
+.history-item[data-transparent="true"] img { background-size: 10px 10px; }
+@media(max-width:700px) {
+  .transparency-control { min-height: 44px; }
+  .transparency-control span { font-size: 12px; }
+  .transparency-switch { position: relative; }
+  .transparency-switch::before { content:''; position:absolute; inset:-12px -5px; }
+}

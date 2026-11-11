@@ -86,3 +86,13 @@ See `POLISH.md` for the review table and motion verdict. This pass supersedes th
 - Checked the new controls at 390 px with no horizontal overflow; desktop controls and artwork inspected at 1280 × 900.
 - SVG background rectangles, glyph/mark colors, accent fills, and metadata follow the chosen palette; accent cutout rectangles use the selected background.
 - Exported both SVG and PNG for palette verification. Browser warning/error logs: none. TypeScript, JavaScript, color utility tests, and production build pass.
+
+## Transparent PNG and SVG exports
+
+- Added a keyboard-operable transparent-background switch and checkerboard preview/thumbnails. Background color remains saved and is restored when transparency is disabled.
+- Verified toggling with Space, reload persistence, history restoration, and Reset colors. Background picker disables while transparent; glyph and accent pickers remain available.
+- Downloaded actual 1638 × 2048 PNG: RGBA, 2,642,125 fully transparent pixels, 14,530 opaque pixels, and 697,969 antialiased pixels.
+- Parsed exported SVG: transparent metadata, 15,761 text elements, 131 accent cutouts in a luminance mask, no background-colored fills, no embedded images, and no full-surface grain/vignette.
+- Opened both exported files side by side over a gradient and visually checked glyphs, accents, and transparent negative space.
+- Checked desktop at 1280 × 900 and mobile at 390 × 844, with no horizontal overflow. Checkerboard fits the displayed image. No browser warning/error logs.
+- JavaScript/TypeScript checks, color utility tests, and production build pass. Separate SVG-editor and physical-device testing were not performed.

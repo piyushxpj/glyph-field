@@ -35,6 +35,7 @@
       </section>
       <section aria-label="Artwork colors" class="artwork-colors">
         <div class="section-heading"><h2>Colors</h2><span>Artwork only</span></div>
+        <input id="transparent-background" type="checkbox" hidden><div id="transparency-control"></div>
         <input id="background-color" type="hidden" value="#181818"><div id="background-picker"></div>
         <input id="glyph-color" type="hidden" value="#dbdbdb"><div id="glyph-picker"></div>
         <input id="accent-color" type="hidden" value="#eeeeee"><div id="palette"></div>
@@ -47,7 +48,7 @@
     </aside>
     <section class="workspace" aria-label="Image preview">
       <div class="preview-top"><div><span id="art-title">MYCELIUM</span><span class="slash">/</span><span class="seed-prefix">Seed</span><span id="seed-display">781204</span></div><span id="dimensions">1638 × 2048</span></div>
-      <div class="art-stage"><canvas id="art" width="800" height="1000" role="img" aria-label="Generated organic ASCII artwork with white and gray glyphs on charcoal"></canvas></div>
+      <div class="art-stage"><div id="transparency-grid" aria-hidden="true"></div><canvas id="art" width="800" height="1000" role="img" aria-label="Generated organic ASCII artwork with white and gray glyphs on charcoal"></canvas></div>
       <div class="preview-bottom"><span class="preview-label"><i aria-hidden="true"></i>Live preview</span><span id="render-status" role="status" aria-live="polite">Ready</span></div>
       <div class="history-header"><h2>Recent compositions <span id="history-count">01</span></h2><span>Select to restore</span></div><div id="history" class="history" aria-label="Recent compositions"></div>
     </section>

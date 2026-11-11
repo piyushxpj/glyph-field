@@ -16,13 +16,14 @@ export function ColorPicker({kind='accent'}:{kind?:'accent'|'background'|'glyph'
   const [compact,setCompact]=useState(matchMedia('(max-width:700px)').matches);
   useEffect(()=>{const query=matchMedia('(max-width:700px)');const sync=()=>setCompact(query.matches);query.addEventListener('change',sync);return ()=>query.removeEventListener('change',sync);},[]);
   const native = document.getElementById(inputId) as HTMLInputElement;
+  const [disabled,setDisabled]=useState(native.disabled);
   const [hex,setHex] = useState(native.value);
   const [draft,setDraft] = useState(native.value);
   const [hsv,setHsv] = useState(hexToHsv(native.value));
   const [error,setError] = useState(false);
   const lastEmitted = useRef('');
   useEffect(()=>{
-    const sync=()=>{if(native.value!==lastEmitted.current){setHex(native.value);setDraft(native.value);setHsv(hexToHsv(native.value));setError(false);}};
+    const sync=()=>{setDisabled(native.disabled);if(native.value!==lastEmitted.current){setHex(native.value);setDraft(native.value);setHsv(hexToHsv(native.value));setError(false);}};
     document.addEventListener('glyph-field:sync',sync);
     return ()=>document.removeEventListener('glyph-field:sync',sync);
   },[native]);
@@ -42,14 +43,14 @@ export function ColorPicker({kind='accent'}:{kind?:'accent'|'background'|'glyph'
   }
   const angle=hsv.h*Math.PI/180;
   const custom=!presets.some(([,color])=>color===hex);
-  return <div className={`accent-control ${compactControl?'compact-color-control':''}`}>
+  return <div className={`accent-control ${disabled?'color-control-disabled':''} ${compactControl?'compact-color-control':''}`}>
     <div className="accent-heading"><span>{name} color</span>{!compactControl&&<span className="color-code">{hex.toUpperCase()}</span>}</div>
     <div className="color-presets" role="group" aria-label={`${name} color controls`}>
       {!compactControl&&presets.map(([name,color])=><button key={name} type="button" className="color-swatch" aria-label={name} title={name} aria-pressed={hex===color} onClick={()=>commit(hexToHsv(color))}>
         <span style={{background:color}}>{hex===color&&<Check size={12} strokeWidth={2.5}/>}</span>
       </button>)}
       <Popover>
-        <PopoverTrigger asChild><Button variant="outline" size="icon" className={`custom-color ${compactControl?'color-value-trigger':''}`} aria-label={compactControl?`Choose ${kind} color`:'Choose custom accent color'} title={`${name} color`} data-selected={custom}>{compactControl?<><span className="trigger-color" style={{background:hex}}/><span className="trigger-hex">{hex.toUpperCase()}</span><ChevronDown size={13}/></>:<Plus size={16}/>}</Button></PopoverTrigger>
+        <PopoverTrigger asChild><Button disabled={disabled} variant="outline" size="icon" className={`custom-color ${compactControl?'color-value-trigger':''}`} aria-label={compactControl?`Choose ${kind} color`:'Choose custom accent color'} title={`${name} color`} data-selected={custom}>{compactControl?<><span className="trigger-color" style={{background:hex}}/><span className="trigger-hex">{hex.toUpperCase()}</span><ChevronDown size={13}/></>:<Plus size={16}/>}</Button></PopoverTrigger>
         <PopoverContent aria-label={`${name} color picker`} side={compact?'top':'right'} align={compact?'end':'center'} sideOffset={12} collisionPadding={12} className="color-popover">
           <div className="color-popover-heading"><span>{name} color</span><span className="color-preview" style={{background:hex}}/></div>
           <div className="color-wheel" role="group" tabIndex={0}
