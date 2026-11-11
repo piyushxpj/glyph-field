@@ -3,6 +3,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular'};
+  const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes'};
   const defaults = {form:'mycelium',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#b980e8',ratio:'4:5',resolution:2048};
   let state = {...defaults}, history = [], timer, revision = 0, exportFormat = 'png';
   const art = $('art');
@@ -13,12 +14,15 @@
     {key:'detail',path:'glyphSize',min:6,max:16},
     {key:'accent',path:'accentMarks',min:0,max:100},
   ];
-  let motionSettings={enabled:true,transition:{type:'spring',visualDuration:.24,bounce:.08}};
+  let motionSettings={enabled:true,transition:{type:'spring',visualDuration:.18,bounce:0}};
   let dial, syncingDials=false, tuneFrame=0;
   const activeAnimations=new Map();
   const forms=document.querySelector('.forms');
   const selection=document.createElement('span');selection.className='structure-selection';selection.setAttribute('aria-hidden','true');forms.prepend(selection);
-  let selectionReady=false;
+  let selectionReady=false, selectionPosition='';
+  document.documentElement.dataset.input='pointer';
+  document.addEventListener('pointerdown',()=>{document.documentElement.dataset.input='pointer';},true);
+  document.addEventListener('keydown',()=>{document.documentElement.dataset.input='keyboard';settleMotion();},true);
   function motionOptions(){const t=motionSettings.transition;return {...t,type:t.type==='easing'?'tween':'spring'};}
   function stopAnimation(element){activeAnimations.get(element)?.stop();activeAnimations.delete(element);}
   function animateUI(element,keyframes,options=motionOptions()){
@@ -26,22 +30,26 @@
     const animation=Motion.animate(element,keyframes,options);activeAnimations.set(element,animation);
     animation.then(()=>{if(activeAnimations.get(element)===animation)activeAnimations.delete(element);});
   }
-  function motionAllowed(){return motionSettings.enabled&&!reducedMotion.matches;}
+  function motionAllowed(){return motionSettings.enabled&&!reducedMotion.matches&&document.documentElement.dataset.input!=='keyboard';}
   function previewFeedback(){
     if(!motionAllowed())return;
-    animateUI(art,{opacity:[.62,1],scale:[.996,1]});
+    animateUI(art,{opacity:[.88,1],scale:[.998,1]});
   }
   function positionSelection(animate=true){
     const button=forms.querySelector('.selected');if(!button)return;
     const x=button.offsetLeft,y=button.offsetTop;
+    const position=[x,y,button.offsetWidth,button.offsetHeight].join(':');
+    if(position===selectionPosition)return;
+    const sameSize=selection.style.width===button.offsetWidth+'px'&&selection.style.height===button.offsetHeight+'px';
+    selectionPosition=position;
     selection.style.width=button.offsetWidth+'px';selection.style.height=button.offsetHeight+'px';
-    if(selectionReady&&animate&&motionAllowed())animateUI(selection,{x,y});
+    if(selectionReady&&sameSize&&animate&&motionAllowed())animateUI(selection,{x,y},{duration:.18,ease:[.23,1,.32,1]});
     else{stopAnimation(selection);Motion.animate(selection,{x,y},{duration:0});}
     selectionReady=true;
   }
   function settleMotion(){
     for(const animation of activeAnimations.values())animation.stop();activeAnimations.clear();
-    art.style.opacity='1';art.style.transform='none';positionSelection(false);
+    art.style.opacity='1';art.style.transform='none';selectionPosition='';positionSelection(false);
   }
   reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches)settleMotion();});
   new ResizeObserver(()=>positionSelection(false)).observe(forms);
@@ -191,6 +199,7 @@
     document.querySelectorAll('.form').forEach(b=>{const on=b.dataset.form===state.form;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on);});
     positionSelection();
     document.querySelectorAll('.swatch').forEach(b=>{const on=b.dataset.color===state.color;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);});
+    $('structure-description').textContent=descriptions[state.form];
     $('art-title').textContent=names[state.form];$('seed-display').textContent=state.seed;
     $('dimensions').textContent=sizeFor(state.ratio,state.resolution).join(' × ');
     art.parentElement.style.setProperty('--art-ratio',state.ratio.replace(':',' / '));
@@ -198,24 +207,38 @@
   function persist(){try{localStorage.setItem('glyph-field-v1',JSON.stringify({state,exportFormat,motionSettings,history:history.map(e=>e.state)}));}catch{/* Private browsing can disable storage. */}}
   function key(s){const {resolution,...visual}=s;return JSON.stringify(visual);}
   function thumbnail(){const c=document.createElement('canvas');c.width=144;c.height=Math.round(144*art.height/art.width);c.getContext('2d').drawImage(art,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.72);}
+  const historyButtons=new Map();
   function showHistory(){
-    $('history').replaceChildren();$('history-count').textContent=String(history.length).padStart(2,'0');
-    history.forEach((entry,i)=>{
-      const button=document.createElement('button');button.className='history-item'+(key(entry.state)===key(state)?' current':'');button.title=`${names[entry.state.form]} · ${entry.state.seed}`;button.setAttribute('aria-label',`Restore ${names[entry.state.form]} seed ${entry.state.seed}`);
-      const img=document.createElement('img');img.src=entry.image;img.alt='';const label=document.createElement('span');label.textContent=entry.state.seed;button.append(img,label);
-      button.addEventListener('click',()=>{clearTimeout(timer);state={...entry.state,resolution:state.resolution};draw(false,true);});$('history').append(button);
+    const container=$('history'),visible=new Set(history.map(entry=>key(entry.state)));
+    for(const [id,button] of historyButtons){if(!visible.has(id)){button.remove();historyButtons.delete(id);}}
+    $('history-count').textContent=String(history.length).padStart(2,'0');
+    history.forEach((entry,index)=>{
+      const id=key(entry.state);let button=historyButtons.get(id);
+      if(!button){
+        button=document.createElement('button');button.className='history-item';
+        button.title=`${names[entry.state.form]} · ${entry.state.seed}`;
+        button.setAttribute('aria-label',`Restore ${names[entry.state.form]} seed ${entry.state.seed}`);
+        const img=document.createElement('img');img.src=entry.image;img.alt='';
+        const label=document.createElement('span');label.className='history-caption';
+        const name=document.createElement('strong');name.textContent=names[entry.state.form];
+        const seed=document.createElement('small');seed.textContent=entry.state.seed;label.append(name,seed);button.append(img,label);
+        button.addEventListener('click',()=>{clearTimeout(timer);state={...entry.state,resolution:state.resolution};draw(false);});
+        historyButtons.set(id,button);
+      }
+      const current=id===key(state);button.classList.toggle('current',current);button.setAttribute('aria-pressed',String(current));
+      // Keep existing nodes in place so keyboard focus survives every render.
+      if(container.children[index]!==button)container.insertBefore(button,container.children[index]||null);
     });
   }
-  function remember(){const k=key(state);const existing=history.find(e=>key(e.state)===k);if(!existing)history.unshift({state:{...state},image:thumbnail()});history=history.slice(0,8);showHistory();persist();if(!existing&&motionAllowed())animateUI($('history').firstElementChild,{opacity:[.4,1],y:[5,0]});}
-  function draw(save=true,feedback=false){
+  function remember(){const k=key(state);const existing=history.find(e=>key(e.state)===k);if(!existing)history.unshift({state:{...state},image:thumbnail()});history=history.slice(0,8);showHistory();persist();}
+  function draw(save=true){
     if(tuneFrame){cancelAnimationFrame(tuneFrame);tuneFrame=0;}
     revision++;sync();const ms=render(art,state);$('render-status').textContent=`Rendered in ${ms} ms`;
     art.setAttribute('aria-label',`${names[state.form]}: organic ASCII artwork, seed ${state.seed}, with pale glyphs and ${state.color} accents on charcoal.`);
     if(save)remember();else{showHistory();persist();}
-    if(feedback)previewFeedback();
   }
-  function generate(){clearTimeout(timer);const a=new Uint32Array(1);crypto.getRandomValues(a);state.seed=String(a[0]%1000000).padStart(6,'0');draw(true,true);}
-  document.querySelectorAll('.form').forEach(b=>b.addEventListener('click',()=>{clearTimeout(timer);state.form=b.dataset.form;draw(true,true);}));
+  function generate(){clearTimeout(timer);const a=new Uint32Array(1);crypto.getRandomValues(a);state.seed=String(a[0]%1000000).padStart(6,'0');draw();}
+  document.querySelectorAll('.form').forEach(b=>b.addEventListener('click',()=>{clearTimeout(timer);state.form=b.dataset.form;draw();}));
   document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{clearTimeout(timer);state.color=b.dataset.color;draw();}));
   $('ratio').addEventListener('change',()=>{state.ratio=$('ratio').value;draw();});
   $('resolution').addEventListener('change',()=>{state.resolution=Number($('resolution').value);sync();persist();});
@@ -226,8 +249,10 @@
   $('generate-quick').addEventListener('click',generate);
   $('reset').addEventListener('click',()=>{clearTimeout(timer);for(const k of ['scale','density','detail','accent','color'])state[k]=defaults[k];draw();});
   document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.defaultPrevented&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!document.activeElement.closest('.dialkit-root,[contenteditable="true"]')&&!['INPUT','SELECT','TEXTAREA','BUTTON','A'].includes(document.activeElement.tagName)){e.preventDefault();generate();}});
+  let exportFeedbackTimer;
   $('download').addEventListener('click',async()=>{
-    const button=$('download'),formatControl=$('export-format');button.disabled=true;formatControl.disabled=true;button.textContent='Exporting…';
+    const button=$('download'),formatControl=$('export-format'),restoreFocus=document.activeElement===$('download');
+    clearTimeout(exportFeedbackTimer);button.dataset.state='busy';button.setAttribute('aria-label','Preparing export');button.setAttribute('aria-busy','true');button.disabled=true;formatControl.disabled=true;
     const exportState={...state},exportRevision=revision,format=exportFormat;
     try{
       await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
@@ -238,9 +263,10 @@
         blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG encoding failed');
       }
       const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`glyph-field-${exportState.form}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+      button.dataset.state='done';button.setAttribute('aria-label','Exported artwork');
       if(revision===exportRevision)$('render-status').textContent=format.toUpperCase()+' exported · '+(format==='svg'?'Scalable vector':sizeFor(exportState.ratio,exportState.resolution).join(' × '));
-    }catch(error){$('render-status').textContent='Export failed. Please try again.';console.error(error);}
-    finally{button.disabled=false;formatControl.disabled=false;button.innerHTML='Export <span aria-hidden="true">↗</span>';}
+    }catch(error){button.dataset.state='idle';$('render-status').textContent='Export failed. Please try again.';console.error(error);}
+    finally{button.disabled=false;formatControl.disabled=false;button.removeAttribute('aria-busy');button.setAttribute('aria-label','Export artwork');if(restoreFocus&&document.activeElement===document.body)button.focus({preventScroll:true});exportFeedbackTimer=setTimeout(()=>{button.dataset.state='idle';},1600);}
   });
   function valid(s){return s&&names[s.form]&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
   try{const saved=JSON.parse(localStorage.getItem('glyph-field-v1'));if(valid(saved?.state))state={...saved.state};if(['png','svg'].includes(saved?.exportFormat))exportFormat=saved.exportFormat;

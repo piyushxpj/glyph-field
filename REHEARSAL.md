@@ -53,3 +53,14 @@ Verified:
 - 390 px mobile layout, including expanded motion controls, has no horizontal overflow.
 
 Not checked: OS reduced-motion emulation, separate Safari/Firefox runs, DialKit version-menu save/restore, and a new PNG download in this pass. Reduced-motion behavior is explicitly wired to the live media query; PNG rendering/export logic was unchanged.
+
+## Emil Kowalski polish (2026-11-11)
+
+See `POLISH.md` for the review table and motion verdict. This pass supersedes the earlier preview/history entrance animations.
+
+- Retested pointer selection, rapid retargeting, keyboard generation, history focus retention, and export focus recovery.
+- Checked layouts at 1280 × 720, 1280 × 900, 390 × 844, and 320 × 740. Narrow layouts have no horizontal document overflow.
+- Saved updated desktop and mobile screenshots.
+- Downloaded PNG: 1638 × 2048. Downloaded SVG: parsed XML, 1638 × 2048, 17,961 text elements, no embedded images.
+- Browser warnings/errors: none during the pass. Build and syntax checks pass.
+- OS reduced-motion emulation and physical-device testing were not performed; live media-query handling and CSS fallbacks were reviewed.

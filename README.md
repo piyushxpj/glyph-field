@@ -4,14 +4,14 @@ A fast, offline studio for generating organic ASCII artwork. Open `index.html` i
 
 ![Glyph Field studio](studio-preview.jpg)
 
-[Download the offline tool](glyph-field-offline.zip) · [Example SVG](examples/mycelium-978573.svg)
+[Open the live studio](https://glyph-field.vercel.app) · [Download the offline tool](glyph-field-offline.zip) · [Example SVG](examples/mycelium-978573.svg)
 
 ## Use
 
 - Choose Mycelium, Archipelago, Currents, Contours, or Cellular.
 - Click **New composition** (**New** on mobile) or press **Space** outside a control for a fresh composition.
 - Adjust form scale, coverage, glyph size, and accent quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.
-- Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn application motion off. Motion feedback honors the system reduced-motion preference. Color swatches remain beneath the controls.
+- Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn preview motion off. Motion feedback honors the system reduced-motion preference. Color swatches remain beneath the controls.
 - Pick portrait, square, landscape, or story format.
 - Choose **PNG** or **SVG** beside **Export** in the toolbar. The format choice is remembered.
 - PNG exports have a 2048 px or 4096 px longest edge. SVG uses that nominal size with a scalable viewBox, editable text, vector marks, a vector grain pattern, and a gradient vignette. It contains no embedded bitmap.
@@ -37,13 +37,13 @@ To serve locally, run `python3 -m http.server 4187` from this directory and open
 
 ## Design verification
 
-The studio applies the installed Stageshow skill’s framing, type, spacing, and neutral-surface guidance to a working application. See `DESIGN-PLAN.md` and `REHEARSAL.md` for scope and verification.
+The studio applies Stageshow’s framing and spacing guidance, with an Emil Kowalski design-engineering pass for interaction polish. See `DESIGN-PLAN.md`, `POLISH.md`, and `REHEARSAL.md` for scope and verification.
 
 ## Development
 
 `npm install` installs DialKit and Motion. Run `npm run build` to refresh the offline bundles and create the static `dist/` deployment, `npm run check` for JavaScript syntax validation, and `npm start` to serve the app. The plain-JavaScript adapters preserve direct `index.html` use; no React conversion or build server is needed to use the tool.
 
-Texture changes render immediately without an entrance animation. New compositions and history selections receive brief preview feedback; the structure selection uses a moving highlight. Motion settings persist alongside the composition. DialKit's version menu supports comparing parameter sets within the session; recent image compositions continue to persist in the app's own history.
+Generation, texture changes, and history restoration update immediately without fading the artwork. Pointer-driven structure selection uses an interruptible 180 ms highlight; keyboard actions remain instant. The export button keeps a fixed width through preparing and completed states. History buttons keep their DOM identity and keyboard focus. Motion settings persist alongside the composition. DialKit's version menu supports comparing parameter sets within the session; recent image compositions continue to persist in the app's own history.
 
 ## Vercel deployment
 
