@@ -15,7 +15,7 @@ for (const name of ['index.html', 'style.css', 'app.js']) {
 await copyFile(join(root, 'glyph-field-offline.zip'), join(output, 'glyph-field-offline.zip')).catch(error => {
   if (error.code !== 'ENOENT') throw error;
 });
-for (const name of ['vendor', 'examples']) {
-  await cp(join(root, name), join(output, name), { recursive: true });
-}
+await cp(join(root, 'vendor'), join(output, 'vendor'), { recursive: true });
+await mkdir(join(output, 'examples'), { recursive: true });
+await copyFile(join(root, 'examples/mycelium-978573.svg'), join(output, 'examples/mycelium-978573.svg'));
 console.log('Static site ready in dist/.');
