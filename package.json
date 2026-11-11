@@ -8,7 +8,7 @@
   "private": true,
   "description": "Offline organic ASCII image studio",
   "scripts": {
-    "build": "node scripts/sync-vendor.mjs",
+    "build": "node scripts/build-static.mjs",
     "check": "node --check app.js",
     "start": "python3 -m http.server 4187 --bind 127.0.0.1"
   },

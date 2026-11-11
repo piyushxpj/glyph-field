@@ -41,6 +41,10 @@ The studio applies the installed Stageshow skill’s framing, type, spacing, and
 
 ## Development
 
-`npm install` installs DialKit and Motion. Run `npm run build` to refresh the checked-in offline bundles after dependency changes, `npm run check` for JavaScript syntax validation, and `npm start` to serve the app. The plain-JavaScript adapters preserve direct `index.html` use; no React conversion or build server is needed to use the tool.
+`npm install` installs DialKit and Motion. Run `npm run build` to refresh the offline bundles and create the static `dist/` deployment, `npm run check` for JavaScript syntax validation, and `npm start` to serve the app. The plain-JavaScript adapters preserve direct `index.html` use; no React conversion or build server is needed to use the tool.
 
 Texture changes render immediately without an entrance animation. New compositions and history selections receive brief preview feedback; the structure selection uses a moving highlight. Motion settings persist alongside the composition. DialKit's version menu supports comparing parameter sets within the session; recent image compositions continue to persist in the app's own history.
+
+## Vercel deployment
+
+`vercel.json` uses `npm ci`, runs `npm run build`, and publishes only `dist/`. The build includes the app, its local libraries, examples, and the offline download. Source control metadata, installed npm packages, and local settings stay outside the deployment output.
