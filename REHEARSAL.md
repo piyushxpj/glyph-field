@@ -64,3 +64,15 @@ See `POLISH.md` for the review table and motion verdict. This pass supersedes th
 - Downloaded PNG: 1638 × 2048. Downloaded SVG: parsed XML, 1638 × 2048, 17,961 text elements, no embedded images.
 - Browser warnings/errors: none during the pass. Build and syntax checks pass.
 - OS reduced-motion emulation and physical-device testing were not performed; live media-query handling and CSS fallbacks were reviewed.
+
+## shadcn controls, neutral branding, and custom accent picker
+
+- Installed official shadcn Button, Select, Popover, and Slider components; replaced action/structure icons with Lucide.
+- Verified ratio selection with Space does not generate a new seed, and history restoration updates the custom ratio control.
+- Pointer wheel drag changes hue/saturation; keyboard brightness endpoints work; invalid hex is rejected; valid hex applies with click and Enter.
+- Escape closes the picker and restores trigger focus. Custom #22aaff survives reload.
+- Checked 320 px and 390 px widths without horizontal overflow. At 390 × 844 the compact picker displays wheel, sliders, and hex input without internal scrolling.
+- Downloaded both PNG and SVG with a custom accent for validation. No browser warning/error logs during control testing.
+- Added color-conversion, hue-wrap, brightness, and wheel-boundary checks; TypeScript and JavaScript checks pass.
+- No physical-device or separate-browser run was performed. The wheel's pointer capture supports touch, and the sliders provide keyboard alternatives.
+- Export validation completed: 1638 × 2048 PNG contains 10,461 blue accent pixels; SVG metadata and text fills contain #22aaff with no embedded bitmaps.

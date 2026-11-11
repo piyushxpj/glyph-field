@@ -10,8 +10,10 @@ A fast, offline studio for generating organic ASCII artwork. Open `index.html` i
 
 - Choose Mycelium, Archipelago, Currents, Contours, or Cellular.
 - Click **New composition** (**New** on mobile) or press **Space** outside a control for a fresh composition.
-- Adjust form scale, coverage, glyph size, and accent quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.
-- Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn preview motion off. Motion feedback honors the system reduced-motion preference. Color swatches remain beneath the controls.
+- Adjust form scale, coverage, glyph size, and letter-mark quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.
+- Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn preview motion off. Motion feedback honors the system reduced-motion preference. Artwork accent controls remain beneath the texture controls.
+- Choose Monochrome, Violet, Sage, Ember, or Ice for the artwork accent. The **+** button opens a custom color wheel with hue, saturation, brightness, and six-digit hex entry. Arrow keys also operate the wheel and sliders. Colors persist in settings and history.
+- The interface branding stays black and white; artwork colors are independent.
 - Pick portrait, square, landscape, or story format.
 - Choose **PNG** or **SVG** beside **Export** in the toolbar. The format choice is remembered.
 - PNG exports have a 2048 px or 4096 px longest edge. SVG uses that nominal size with a scalable viewBox, editable text, vector marks, a vector grain pattern, and a gradient vignette. It contains no embedded bitmap.
@@ -31,7 +33,9 @@ The renderer creates seeded, domain-warped noise fields, classifies foreground c
 - `style.css` — responsive layout
 - `app.js` — seeded renderer, export, local history, DialKit binding, and Motion feedback
 - `vendor/` — local DialKit 2.2.0 and Motion 14.12.0 browser bundles, styles, and licenses
-- `scripts/sync-vendor.mjs` — rebuilds browser bundles from the installed npm packages
+- `src/` — shadcn components, React control adapters, color picker, and color conversions
+- `scripts/build-ui.mjs` — bundles the component UI and collects dependency license notices
+- `scripts/sync-vendor.mjs` — refreshes DialKit and Motion browser bundles
 
 To serve locally, run `python3 -m http.server 4187` from this directory and open `http://localhost:4187`.
 
@@ -41,7 +45,7 @@ The studio applies Stageshow’s framing and spacing guidance, with an Emil Kowa
 
 ## Development
 
-`npm install` installs DialKit and Motion. Run `npm run build` to refresh the offline bundles and create the static `dist/` deployment, `npm run check` for JavaScript syntax validation, and `npm start` to serve the app. The plain-JavaScript adapters preserve direct `index.html` use; no React conversion or build server is needed to use the tool.
+`npm install` installs the UI and build dependencies. Run `npm run build` to refresh the offline bundles and create the static `dist/` deployment, `npm run check` for JavaScript syntax and TypeScript checks, `npm test` for color math and wheel-boundary checks, and `npm start` to serve the app. The renderer remains plain JavaScript. Small React roots host shadcn Button, Select, Popover, and Slider components with Lucide icons; esbuild and Tailwind produce local browser bundles. The compiled app still opens directly from `index.html` without a build server or network connection.
 
 Generation, texture changes, and history restoration update immediately without fading the artwork. Pointer-driven structure selection uses an interruptible 180 ms highlight; keyboard actions remain instant. The export button keeps a fixed width through preparing and completed states. History buttons keep their DOM identity and keyboard focus. Motion settings persist alongside the composition. DialKit's version menu supports comparing parameter sets within the session; recent image compositions continue to persist in the app's own history.
 

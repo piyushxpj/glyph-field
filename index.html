@@ -6,48 +6,49 @@
   <meta name="description" content="Create organic ASCII artwork instantly. Shape the texture, explore seeded compositions, and export PNG or editable SVG.">
   <title>Glyph Field — ASCII image studio</title>
   <link rel="stylesheet" href="vendor/dialkit.css">
+  <link rel="stylesheet" href="vendor/ui.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="wordmark" href="./" aria-label="Glyph Field home">Glyph Field<span class="version">Studio</span></a>
+    <a class="wordmark" href="./" aria-label="Glyph Field home">Glyph Field<span class="version">STUDIO</span></a>
     <span class="top-note">Organic forms, drawn in type.</span>
-    <button id="generate" class="generate"><span aria-hidden="true" class="shuffle-icon">⤨</span>New composition <kbd>Space</kbd></button>
-    <button id="generate-quick" class="quick-generate" aria-label="Generate new image" title="Generate new image">New</button>
-    <div class="export-controls"><select id="export-format" aria-label="Export format"><option value="png">PNG</option><option value="svg">SVG</option></select><button id="download" class="export" data-state="idle" aria-label="Export artwork"><span class="export-face export-idle" aria-hidden="true">Export <span>↗</span></span><span class="export-face export-busy" aria-hidden="true">Preparing</span><span class="export-face export-done" aria-hidden="true">Exported <span>✓</span></span></button></div>
+    <select id="export-format" hidden aria-hidden="true" tabindex="-1"><option value="png">PNG</option><option value="svg">SVG</option></select>
+    <div id="toolbar"></div>
   </header>
   <main>
     <aside class="controls" aria-label="Artwork controls">
       <div class="intro"><h1>Composition</h1><p>Shape the field. Keep the character.</p></div>
       <section><div class="section-heading"><h2>Structure</h2><span>5 forms</span></div>
         <div class="forms" role="group" aria-label="Structure">
-          <button class="form selected" data-form="mycelium" aria-pressed="true" title="Branching networks"><svg class="form-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17C6 13 7 6 10 4M6 12C11 13 14 8 17 4M8 9C5 8 4 5 3 3M9 12C11 15 15 17 18 17"/></svg><span class="form-name">Mycelium</span><span class="form-desc">Branching networks</span></button>
-          <button class="form" data-form="islands" aria-pressed="false" title="Scattered landforms"><svg class="form-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5C1 6 2 11 5 11S10 8 8 5S5 4 4 5ZM15 10C11 10 10 16 14 17S20 14 18 11Z"/></svg><span class="form-name">Archipelago</span><span class="form-desc">Scattered landforms</span></button>
-          <button class="form" data-form="ribbons" aria-pressed="false" title="Winding channels"><svg class="form-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6C7 0 12 12 19 5M1 11C7 5 12 17 19 10M1 16C7 10 12 22 19 15"/></svg><span class="form-name">Currents</span><span class="form-desc">Winding channels</span></button>
-          <button class="form" data-form="contours" aria-pressed="false" title="Nested elevations"><svg class="form-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2C1 0 0 13 5 17S20 20 19 10S14 3 10 2ZM10 6C5 5 4 12 8 14S16 13 15 10S12 6 10 6Z"/></svg><span class="form-name">Contours</span><span class="form-desc">Nested elevations</span></button>
-          <button class="form" data-form="cells" aria-pressed="false" title="Organic membranes"><svg class="form-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2L14 3L19 9L15 17L8 19L2 13L1 6ZM7 2L9 9L2 13M9 9L19 9M9 9L8 19"/></svg><span class="form-name">Cellular</span><span class="form-desc">Organic membranes</span></button>
+          <button class="form selected" data-form="mycelium" aria-pressed="true" title="Branching networks"><span class="form-icon" data-icon="GitBranch"></span><span class="form-name">Mycelium</span><span class="form-desc">Branching networks</span></button>
+          <button class="form" data-form="islands" aria-pressed="false" title="Scattered landforms"><span class="form-icon" data-icon="CircleDot"></span><span class="form-name">Archipelago</span><span class="form-desc">Scattered landforms</span></button>
+          <button class="form" data-form="ribbons" aria-pressed="false" title="Winding channels"><span class="form-icon" data-icon="Waves"></span><span class="form-name">Currents</span><span class="form-desc">Winding channels</span></button>
+          <button class="form" data-form="contours" aria-pressed="false" title="Nested elevations"><span class="form-icon" data-icon="Layers"></span><span class="form-name">Contours</span><span class="form-desc">Nested elevations</span></button>
+          <button class="form" data-form="cells" aria-pressed="false" title="Organic membranes"><span class="form-icon" data-icon="Hexagon"></span><span class="form-name">Cellular</span><span class="form-desc">Organic membranes</span></button>
         </div>
         <p id="structure-description" class="structure-description">Branching networks</p>
       </section>
       <section class="texture" aria-label="Live texture and motion controls">
         <div id="dial-panel"></div>
-        <div class="palette-row"><span>Accent color</span><div class="swatches" role="group" aria-label="Accent color"><button class="swatch active" data-color="#b980e8" style="--swatch:#b980e8" aria-label="Violet" aria-pressed="true"></button><button class="swatch" data-color="#b9d89c" style="--swatch:#b9d89c" aria-label="Sage" aria-pressed="false"></button><button class="swatch" data-color="#f49a77" style="--swatch:#f49a77" aria-label="Ember" aria-pressed="false"></button><button class="swatch" data-color="#9bcddd" style="--swatch:#9bcddd" aria-label="Ice" aria-pressed="false"></button><button class="swatch" data-color="#d9d9d2" style="--swatch:#d9d9d2" aria-label="Monochrome" aria-pressed="false"></button></div></div>
-        <button id="reset" class="text-button texture-reset">Reset texture</button>
+        <input id="accent-color" type="hidden" value="#eeeeee"><div id="palette"></div>
+        <div id="reset-control"></div>
       </section>
-      <section><div class="section-heading"><h2>Canvas</h2></div><div class="canvas-options"><label>Ratio<select id="ratio"><option value="4:5">Portrait · 4:5</option><option value="1:1">Square · 1:1</option><option value="16:9">Landscape · 16:9</option><option value="9:16">Story · 9:16</option></select></label><label>Export size<select id="resolution"><option value="2048">2K · 2048 px</option><option value="4096">4K · 4096 px</option></select></label></div>
-        <label class="seed-label" for="seed">Seed <span>Repeat a composition</span></label><div class="seed-wrap"><input id="seed" value="781204" maxlength="24" spellcheck="false" aria-label="Composition seed"><button id="apply-seed" aria-label="Apply seed">↵</button></div>
+      <section><div class="section-heading"><h2>Canvas</h2></div><div class="canvas-options"><div class="canvas-option"><span class="field-label">Ratio</span><select id="ratio" hidden aria-hidden="true" tabindex="-1"><option value="4:5">Portrait · 4:5</option><option value="1:1">Square · 1:1</option><option value="16:9">Landscape · 16:9</option><option value="9:16">Story · 9:16</option></select><div id="ratio-select"></div></div><div class="canvas-option"><span class="field-label">Export size</span><select id="resolution" hidden aria-hidden="true" tabindex="-1"><option value="2048">2K · 2048 px</option><option value="4096">4K · 4096 px</option></select><div id="resolution-select"></div></div></div>
+        <label class="seed-label" for="seed">Seed <span>Repeat a composition</span></label><div class="seed-wrap"><input id="seed" value="781204" maxlength="24" spellcheck="false" aria-label="Composition seed"><span id="seed-apply"></span></div>
       </section>
       <p class="local-note">Made in your browser. Yours to keep.</p>
     </aside>
     <section class="workspace" aria-label="Image preview">
       <div class="preview-top"><div><span id="art-title">MYCELIUM</span><span class="slash">/</span><span class="seed-prefix">Seed</span><span id="seed-display">781204</span></div><span id="dimensions">1638 × 2048</span></div>
-      <div class="art-stage"><canvas id="art" width="800" height="1000" role="img" aria-label="Generated organic ASCII artwork with white glyphs and violet accents on charcoal"></canvas></div>
+      <div class="art-stage"><canvas id="art" width="800" height="1000" role="img" aria-label="Generated organic ASCII artwork with white and gray glyphs on charcoal"></canvas></div>
       <div class="preview-bottom"><span class="preview-label"><i aria-hidden="true"></i>Live preview</span><span id="render-status" role="status" aria-live="polite">Ready</span></div>
       <div class="history-header"><h2>Recent compositions <span id="history-count">01</span></h2><span>Select to restore</span></div><div id="history" class="history" aria-label="Recent compositions"></div>
     </section>
   </main>
   <script src="vendor/dialkit.js"></script>
   <script src="vendor/motion.js"></script>
+  <script src="vendor/ui.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

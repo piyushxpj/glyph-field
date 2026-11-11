@@ -20,3 +20,16 @@ Applied the installed `emil-design-eng` principles and `review-animations` bar t
 Verified in the browser: rapid structure selection finishes aligned; keyboard generation leaves artwork at opacity 1 with no transform; history restoration keeps focus; keyboard export returns focus to the button; no horizontal overflow at 320/390 px; downloaded PNG dimensions and SVG XML structure; no warning/error logs.
 
 Not tested: physical touch hardware, separate Firefox/Safari runs, or changing the operating-system reduced-motion setting. Reduced-motion paths were reviewed in source. No frame-by-frame performance trace was captured.
+
+## Neutral branding and custom artwork colors
+
+| Before | After | Why |
+| --- | --- | --- |
+| Tinted interface selection/focus colors | Neutral black, white, and gray chrome | Matches the monochrome branding direction |
+| Native ratio/export selectors and mixed icons | Official shadcn Select/Button sources with Lucide icons | Consistent geometry, keyboard behavior, and focus treatment |
+| Preset accent colors only | Presets plus shadcn Popover/Slider color wheel | Artwork can use any RGB accent without changing the interface brand |
+| Default component-wide transitions | Explicit transforms/opacity; keyboard and reduced-motion overrides | Preserves the prior motion rules |
+
+The artwork keeps Monochrome, Violet, Sage, Ember, and Ice presets. Existing saved colors are preserved; there is no color-removal migration. The custom picker supports pointer capture, keyboard hue/saturation adjustment, three labeled sliders, validated hex input, Escape dismissal, and trigger focus restoration. Preset and custom accent colors are reflected in PNG and SVG exports.
+
+Source components are copied from the official shadcn registry and customized locally. The renderer remains the state owner; native controls and a synchronization event bridge the small React roots. Local UI bundles and upstream notices are included in the offline package.

@@ -1,0 +1,14 @@
+import { build } from 'esbuild';
+import assert from 'node:assert/strict';
+const compiled = await build({entryPoints:['src/color-utils.ts'],bundle:true,write:false,format:'esm',platform:'node'});
+const {hexToHsv,hsvToHex,wheelPoint} = await import('data:text/javascript;base64,'+Buffer.from(compiled.outputFiles[0].text).toString('base64'));
+for(const color of ['#000000','#ffffff','#eeeeee','#ff0000','#00ff00','#0000ff','#b980e8','#b9d89c','#f49a77','#9bcddd','#123456','#804020']) assert.equal(hsvToHex(hexToHsv(color)),color);
+assert.equal(hsvToHex({h:0,s:100,v:100}),'#ff0000');
+assert.equal(hsvToHex({h:360,s:100,v:100}),'#ff0000');
+assert.equal(hsvToHex({h:60,s:100,v:100}),'#ffff00');
+assert.equal(hsvToHex({h:240,s:100,v:50}),'#000080');
+assert.equal(wheelPoint(100,100,200,200).s,0);
+assert.deepEqual(wheelPoint(100,0,200,200),{h:0,s:100});
+assert.deepEqual(wheelPoint(200,100,200,200),{h:90,s:100});
+assert.equal(wheelPoint(300,100,200,200).s,100);
+console.log('Color conversions, hue wrap, brightness, and wheel boundaries pass.');

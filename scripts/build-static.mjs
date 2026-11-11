@@ -1,4 +1,5 @@
 import './sync-vendor.mjs';
+import './build-ui.mjs';
 import { copyFile, cp, mkdir, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
