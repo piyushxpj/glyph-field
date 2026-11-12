@@ -19,7 +19,7 @@
   <main>
     <aside class="controls" aria-label="Artwork controls">
       <div class="intro"><h1>Composition</h1><p>Shape the field. Keep the character.</p></div>
-      <section><div class="section-heading"><h2>Structure</h2><span>6 forms</span></div>
+      <section><div class="section-heading"><h2>Structure</h2><span>7 forms</span></div>
         <div class="forms" role="group" aria-label="Structure">
           <button class="form selected" data-form="mycelium" aria-pressed="true" title="Branching networks"><span class="form-icon" data-icon="GitBranch"></span><span class="form-name">Mycelium</span><span class="form-desc">Branching networks</span></button>
           <button class="form" data-form="islands" aria-pressed="false" title="Scattered landforms"><span class="form-icon" data-icon="CircleDot"></span><span class="form-name">Archipelago</span><span class="form-desc">Scattered landforms</span></button>
@@ -27,6 +27,7 @@
           <button class="form" data-form="contours" aria-pressed="false" title="Nested elevations"><span class="form-icon" data-icon="Layers"></span><span class="form-name">Contours</span><span class="form-desc">Nested elevations</span></button>
           <button class="form" data-form="cells" aria-pressed="false" title="Organic membranes"><span class="form-icon" data-icon="Hexagon"></span><span class="form-name">Cellular</span><span class="form-desc">Organic membranes</span></button>
           <button class="form" data-form="circles" aria-pressed="false" title="Repeating circular motifs"><span class="form-icon" data-icon="CircleDot"></span><span class="form-name">Circles</span><span class="form-desc">Repeating circular motifs</span></button>
+          <button class="form" data-form="spiral" aria-pressed="false" title="Scattered dotted spirals"><span class="form-icon" data-icon="Orbit"></span><span class="form-name">Spiral</span><span class="form-desc">Scattered dotted spirals</span></button>
         </div>
         <p id="structure-description" class="structure-description">Branching networks</p>
       </section>
@@ -38,13 +39,25 @@
         <label class="circle-range-label" for="circle-spacing">Spacing <output id="circle-spacing-value">28</output></label><input class="circle-range" id="circle-spacing" type="range" min="0" max="80" value="28">
         <p class="structure-description">New composition varies the texture. Scatter also varies circle positions and sizes.</p>
       </section>
+      <section id="spiral-controls" class="shape-section" aria-label="Spiral pattern" hidden>
+        <div class="section-heading"><h2>Spiral pattern</h2><span>Dotted trails</span></div>
+        <select id="spiral-direction" hidden aria-hidden="true" tabindex="-1"><option value="clockwise">Clockwise</option><option value="counterclockwise">Counterclockwise</option></select><div id="spiral-direction-select"></div>
+        <label class="circle-range-label" for="spiral-turns">Turns <output id="spiral-turns-value">3.5</output></label><input class="circle-range" id="spiral-turns" type="range" min="1" max="7" step="0.5" value="3.5">
+        <label class="circle-range-label" for="spiral-arms">Arms <output id="spiral-arms-value">2</output></label><input class="circle-range" id="spiral-arms" type="range" min="1" max="5" step="1" value="2">
+        <label class="circle-range-label" for="spiral-scatter">Scatter <output id="spiral-scatter-value">55</output></label><input class="circle-range" id="spiral-scatter" type="range" min="0" max="100" step="1" value="55">
+        <label class="circle-range-label" for="spiral-dot-size">Dot size <output id="spiral-dot-size-value">8</output></label><input class="circle-range" id="spiral-dot-size" type="range" min="2" max="14" step="1" value="8">
+        <label class="circle-range-label" for="spiral-density">Dot density <output id="spiral-density-value">75</output></label><input class="circle-range" id="spiral-density" type="range" min="20" max="100" step="1" value="75">
+        <label class="circle-range-label" for="spiral-accent">Accent mix <output id="spiral-accent-value">35</output></label><input class="circle-range" id="spiral-accent" type="range" min="0" max="100" step="1" value="35">
+        <div id="spiral-palette-control"></div>
+        <p class="structure-description">Use the reference’s lavender and pink palette, or choose your own colors below.</p>
+      </section>
       <section id="shape-controls" class="shape-section" aria-label="Artwork shape">
         <div class="section-heading"><h2>Frame</h2><span>Optional crop</span></div>
         <select id="shape" hidden aria-hidden="true" tabindex="-1"><option value="freeform">Freeform</option><option value="circle">Circle</option><option value="rounded">Rounded box</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="hexagon">Hexagon</option><option value="triangle">Triangle</option><option value="ring">Ring</option></select><div id="shape-select"></div>
         <div id="shape-fill-row" class="shape-fill-row" hidden><span class="field-label">Fill</span><select id="shape-fill" hidden aria-hidden="true" tabindex="-1"><option value="pattern">Organic pattern</option><option value="solid">Full glyph fill</option></select><div id="shape-fill-select"></div></div>
         <p id="shape-description" class="structure-description">Let the pattern extend to the canvas edges.</p>
       </section>
-      <section class="texture" aria-label="Live texture and motion controls">
+      <section id="texture-controls" class="texture" aria-label="Live texture and motion controls">
         <div id="dial-panel"></div>
         <div id="reset-control"></div>
       </section>

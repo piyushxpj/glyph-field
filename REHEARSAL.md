@@ -120,3 +120,12 @@ See `POLISH.md` for the review table and motion verdict. This pass supersedes th
 - Browser-checked grid, scatter, radial concentric patterns, size/spacing keyboard changes, reload persistence, and 390 px layout without horizontal overflow. Observed preview rendering around 8–18 ms; no warning/error logs.
 - Downloaded radial/concentric SVG; parsed metadata and verified multiple glyph motifs with no silhouette clip. Existing PNG uses the same field renderer as the visible canvas.
 - JavaScript/TypeScript checks, color tests, shape/pattern tests, and production build pass. No new standalone PNG download or physical-device run was performed in this pass.
+
+## Dotted spiral structure
+
+- Added seeded dotted spirals with turns, arms, scatter, dot size/density, accent mix, and clockwise/counterclockwise direction. Dedicated controls replace unrelated glyph texture/frame controls in Spiral mode.
+- Added an optional lavender/pink/gray reference palette and a contextual Dot color label; UI branding stays monochrome. Colors and all spiral settings persist with the existing state/history system.
+- Spiral PNG and SVG share identical generated point coordinates. SVG contains editable circle elements; alpha mode skips the background entirely.
+- Automated checks cover deterministic seeds, finite point sizes/positions, density changes, direction reversal, accent endpoints, four aspect ratios, and opaque/transparent SVG. Existing shape/circle/color checks pass.
+- Visually checked the local spiral and reference palette, slider updates, and transparent preview. Downloaded a transparent 1638 × 2048 PNG successfully.
+- No new separate-browser or physical-device run was performed.

@@ -8,7 +8,8 @@ A fast, offline studio for generating organic ASCII artwork. Open `index.html` i
 
 ## Use
 
-- Choose Mycelium, Archipelago, Currents, Contours, Cellular, or **Circles**.
+- Choose Mycelium, Archipelago, Currents, Contours, Cellular, **Circles**, or **Spiral**.
+- **Spiral** creates dotted winding trails inspired by a scattered, two-tone reference. Adjust turns, arms, scatter, dot size, dot density, accent mix, and direction. **Use reference palette** applies lavender dots, pink accents, and a light gray background; all three colors remain editable. The glyph picker becomes **Dot color** in this mode. Transparent PNG and editable-circle SVG exports preserve the same composition.
 - **Circles** builds a pattern from repeated circular motifs. Choose **Symmetric grid**, **Staggered rows**, **Radial symmetry**, or **Asymmetric scatter**. Choose rings, filled circles, or concentric rings, then adjust **Circle size** and **Spacing**. Coverage adjusts ring weight. New composition varies glyph texture; scatter also varies circle positions and sizes. All settings persist and work with PNG/SVG and transparency.
 - In **Frame**, choose Circle, Rounded box, Square, Diamond, Hexagon, Triangle, or Ring. **Freeform** keeps the original edge-to-edge compositions. Shapes stay proportional in every canvas ratio. This optional crop applies to the original organic structures; Circles uses its own repeated layout.
 - Choose **Organic pattern** to contain the existing form inside the silhouette, or **Full glyph fill** for a continuous textured shape. Shape and fill persist in history and settings and apply to both PNG and SVG, including transparent exports. Structure and texture controls vary the interior; the silhouette stays fixed.

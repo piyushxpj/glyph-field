@@ -4,7 +4,7 @@ import vm from 'node:vm';
 const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const ctx=vm.createContext({performance,console});
 vm.runInContext(readFileSync(new URL('../shapes.js',import.meta.url),'utf8'),ctx);
-vm.runInContext(`const names={mycelium:'Mycelium'};const shapeGeometry=GlyphShapes.geometry;const circlePattern=GlyphShapes.circlePattern;const compositionName=s=>GlyphShapes.names[s.shape];`+source.slice(source.indexOf('  function hash('),source.indexOf('  function sync(){')),ctx);
+vm.runInContext(`const names={mycelium:'Mycelium'};const shapeGeometry=GlyphShapes.geometry;const circlePattern=GlyphShapes.circlePattern;const spiralPoints=GlyphShapes.spiralPoints;const compositionName=s=>GlyphShapes.names[s.shape];`+source.slice(source.indexOf('  function hash('),source.indexOf('  function sync(){')),ctx);
 const state={form:'mycelium',seed:'shape-test',scale:50,density:48,detail:12,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',resolution:2048};
 for(const [kind] of Object.entries(ctx.GlyphShapes.names)){
  for(const ratio of ['4:5','16:9','1:1','9:16']){
@@ -49,3 +49,21 @@ for(const layout of Object.keys(ctx.GlyphShapes.arrangements)){
  }
 }
 console.log('Repeated circle geometry, symmetry, seeded scatter, three motifs, and SVG exports pass.');
+
+const spiralState={...state,form:'spiral',spiralTurns:3.5,spiralArms:2,spiralScatter:55,spiralDotSize:8,spiralDensity:75,spiralAccent:35,spiralDirection:'clockwise',ratio:'4:5',transparent:true};
+ctx.testState=spiralState;
+const spiral=()=>vm.runInContext('spiralPoints(testState,1200,1500,random(44))',ctx);
+const dots=spiral();assert(dots.length>500);assert.deepEqual(dots,spiral());assert(dots.some(p=>p.accent)&&dots.some(p=>!p.accent));
+assert(dots.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.r>0));
+ctx.testState={...spiralState,spiralAccent:0};assert(spiral().every(p=>!p.accent));
+ctx.testState={...spiralState,spiralAccent:100};assert(spiral().every(p=>p.accent));
+ctx.testState={...spiralState,spiralDensity:20};const sparse=spiral().length;
+ctx.testState={...spiralState,spiralDensity:100};assert(spiral().length>sparse);
+ctx.testState={...spiralState,spiralDirection:'counterclockwise'};assert.notDeepEqual(dots,spiral());
+for(const ratio of ['4:5','1:1','16:9','9:16'])for(const transparent of [true,false]){
+ ctx.testState={...spiralState,ratio,transparent};
+ const svg=vm.runInContext('render(null,testState,2048,true)',ctx);
+ assert((svg.match(/<circle /g)||[]).length>500);assert(!svg.includes('<image'));assert(!svg.includes('clipPath'));assert(!svg.includes('NaN'));
+ assert.equal(svg.includes('<rect '),!transparent);assert(svg.includes('fill="#dbdbdb"')&&svg.includes('fill="#eeeeee"'));
+}
+console.log('Spiral seed determinism, density, direction, accent endpoints, four ratios and alpha SVG pass.');

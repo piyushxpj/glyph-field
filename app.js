@@ -2,11 +2,12 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular',circles:'Circles'};
-  const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes',circles:'Repeating circular motifs'};
-  const {names:shapeNames,geometry:shapeGeometry,arrangements,circlePattern}=GlyphShapes;
-  const compositionName=s=>s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
-  const defaults = {form:'mycelium',circleLayout:'grid',circleStyle:'rings',circleSize:60,circleSpacing:28,shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048};
+  const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular',circles:'Circles',spiral:'Spiral'};
+  const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes',circles:'Repeating circular motifs',spiral:'Scattered dotted spirals'};
+  const {names:shapeNames,geometry:shapeGeometry,arrangements,circlePattern,spiralPoints}=GlyphShapes;
+  const compositionName=s=>s.form==='spiral'?'Spiral':s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
+  const defaults = {form:'mycelium',spiralTurns:3.5,spiralArms:2,spiralScatter:55,spiralDotSize:8,spiralDensity:75,spiralAccent:35,spiralDirection:'clockwise',circleLayout:'grid',circleStyle:'rings',circleSize:60,circleSpacing:28,shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048};
+  const SPIRAL_CONTROLS=[['turns','spiralTurns',1,7],['arms','spiralArms',1,5],['scatter','spiralScatter',0,100],['dot-size','spiralDotSize',2,14],['density','spiralDensity',20,100],['accent','spiralAccent',0,100]];
   let state = {...defaults}, history = [], timer, revision = 0, exportFormat = 'png';
   const art = $('art');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -100,6 +101,15 @@
     }
     if(!s.transparent)rect(0,0,lw,lh,s.background);
     const seed=hash(s.seed),rnd=random(seed),noise=noiseFactory(seed),short=Math.min(lw,lh);
+    if(s.form==='spiral'){
+      const points=spiralPoints(s,lw,lh,rnd);
+      for(const p of points){const color=p.accent?s.color:s.glyph;
+        if(vector)parts.push(`<circle cx="${number(p.x)}" cy="${number(p.y)}" r="${number(p.r)}" fill="${color}"/>`);
+        else{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
+      }
+      if(vector)return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${lw} ${lh}" overflow="hidden"><title>Spiral — ${escapeXML(s.seed)}</title><desc>Seeded dotted spiral trails. Editable vector circles.</desc><metadata>${escapeXML(JSON.stringify(s))}</metadata>${parts.join('')}</svg>`;
+      return Math.round(performance.now()-start);
+    }
     const shape=s.form==='circles'?null:shapeGeometry(s.shape||'freeform',lw,lh);
     const circular=s.form==='circles'?circlePattern(s,lw,lh,random(seed^0x517cc1b7)):null;
     if(shape&&!vector){ctx.save();ctx.clip(new Path2D(shape.path),'evenodd');}
@@ -227,14 +237,16 @@
   }
   function sync(){
     if(dial){syncingDials=true;try{dial.setValues(Object.fromEntries(CONTROL_SPECS.map(c=>[c.path,state[c.key]])));}finally{syncingDials=false;}}
-    $('circle-controls').hidden=state.form!=='circles';$('shape-controls').hidden=state.form==='circles';
+    $('circle-controls').hidden=state.form!=='circles';$('shape-controls').hidden=['circles','spiral'].includes(state.form);$('spiral-controls').hidden=state.form!=='spiral';$('texture-controls').hidden=state.form==='spiral';
+    $('spiral-direction').value=state.spiralDirection;
+    for(const [id,key] of SPIRAL_CONTROLS){$('spiral-'+id).value=state[key];$('spiral-'+id+'-value').textContent=state[key];}
     $('circle-layout').value=state.circleLayout;$('circle-style').value=state.circleStyle;
     for(const [id,key] of [['circle-size','circleSize'],['circle-spacing','circleSpacing']]){$(id).value=state[key];$(id+'-value').textContent=state[key];}
     $('shape').value=state.shape;$('shape-fill').value=state.shapeFill;$('shape-fill-row').hidden=state.shape==='freeform';$('shape-description').textContent=state.shape==='freeform'?'Let the pattern extend to the canvas edges.':'A centered '+shapeNames[state.shape].toLowerCase()+', filled with glyphs.';
     $('seed').value=state.seed;$('ratio').value=state.ratio;$('resolution').value=state.resolution;
     document.querySelectorAll('.form').forEach(b=>{const on=b.dataset.form===state.form;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on);});
     positionSelection();
-    $('accent-color').value=state.color;$('background-color').value=state.background;$('glyph-color').value=state.glyph;
+    $('accent-color').value=state.color;$('background-color').value=state.background;$('glyph-color').value=state.glyph;$('glyph-color').dataset.label=state.form==='spiral'?'Dot':'Glyph';
     $('transparent-background').checked=state.transparent;$('background-color').disabled=state.transparent;
     art.parentElement.classList.toggle('is-transparent',state.transparent);
     $('structure-description').textContent=descriptions[state.form];
@@ -275,15 +287,17 @@
   function draw(save=true){
     if(tuneFrame){cancelAnimationFrame(tuneFrame);tuneFrame=0;}
     revision++;sync();const ms=render(art,state);fitChecker();$('render-status').textContent=`Rendered in ${ms} ms`;
-    art.setAttribute('aria-label',`${compositionName(state)}: ASCII artwork, seed ${state.seed}, with ${state.glyph} glyphs, ${state.color} accents, and a ${state.transparent?'transparent':state.background} background.`);
+    art.setAttribute('aria-label',`${compositionName(state)}: ${state.form==='spiral'?'dotted spiral':'ASCII'} artwork, seed ${state.seed}, with ${state.glyph} ${state.form==='spiral'?'dots':'glyphs'}, ${state.color} accents, and a ${state.transparent?'transparent':state.background} background.`);
     if(save)remember();else{showHistory();persist();}
   }
   function generate(){clearTimeout(timer);const a=new Uint32Array(1);crypto.getRandomValues(a);state.seed=String(a[0]%1000000).padStart(6,'0');draw();}
   document.querySelectorAll('.form').forEach(b=>b.addEventListener('click',()=>{clearTimeout(timer);state.form=b.dataset.form;draw();}));
   for(const [id,key] of [['accent-color','color'],['background-color','background'],['glyph-color','glyph']])$(id).addEventListener('change',()=>{state[key]=$(id).value;draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
   $('transparent-background').addEventListener('change',()=>{clearTimeout(timer);state.transparent=$('transparent-background').checked;draw();});
-  for(const [id,key] of [['shape','shape'],['shape-fill','shapeFill'],['circle-layout','circleLayout'],['circle-style','circleStyle']])$(id).addEventListener('change',()=>{clearTimeout(timer);state[key]=$(id).value;draw();});
+  for(const [id,key] of [['shape','shape'],['shape-fill','shapeFill'],['circle-layout','circleLayout'],['circle-style','circleStyle'],['spiral-direction','spiralDirection']])$(id).addEventListener('change',()=>{clearTimeout(timer);state[key]=$(id).value;draw();});
   for(const [id,key] of [['circle-size','circleSize'],['circle-spacing','circleSpacing']])$(id).addEventListener('input',()=>{state[key]=Number($(id).value);draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
+  for(const [id,key] of SPIRAL_CONTROLS)$('spiral-'+id).addEventListener('input',()=>{state[key]=Number($('spiral-'+id).value);draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
+  $('spiral-palette').addEventListener('click',()=>{clearTimeout(timer);state.background='#c8c8cb';state.glyph='#7771ca';state.color='#df77da';draw();});
   $('ratio').addEventListener('change',()=>{state.ratio=$('ratio').value;draw();});
   $('resolution').addEventListener('change',()=>{state.resolution=Number($('resolution').value);sync();persist();});
   $('export-format').addEventListener('change',()=>{exportFormat=$('export-format').value;persist();});
@@ -307,13 +321,13 @@
         const canvas=document.createElement('canvas');render(canvas,exportState,exportState.resolution);
         blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG encoding failed');
       }
-      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`glyph-field-${exportState.form}${exportState.form==='circles'?'-'+exportState.circleLayout+'-'+exportState.circleStyle:exportState.shape==='freeform'?'':'-'+exportState.shape}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`glyph-field-${exportState.form}${exportState.form==='spiral'?'':exportState.form==='circles'?'-'+exportState.circleLayout+'-'+exportState.circleStyle:exportState.shape==='freeform'?'':'-'+exportState.shape}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
       button.dataset.state='done';button.setAttribute('aria-label','Exported artwork');
       if(revision===exportRevision)$('render-status').textContent=format.toUpperCase()+' exported · '+(exportState.transparent?'Transparent · ':'')+(format==='svg'?'Scalable vector':sizeFor(exportState.ratio,exportState.resolution).join(' × '));
     }catch(error){button.dataset.state='idle';$('render-status').textContent='Export failed. Please try again.';console.error(error);}
     finally{button.disabled=false;formatControl.disabled=false;button.removeAttribute('aria-busy');button.setAttribute('aria-label','Export artwork');if(restoreFocus&&document.activeElement===document.body)button.focus({preventScroll:true});exportFeedbackTimer=setTimeout(()=>{button.dataset.state='idle';},1600);}
   });
-  function valid(s){return s&&Object.hasOwn(names,s.form)&&(s.circleLayout===undefined||Object.hasOwn(arrangements,s.circleLayout))&&(s.circleStyle===undefined||['rings','discs','concentric'].includes(s.circleStyle))&&[['circleSize',20,100],['circleSpacing',0,80]].every(([k,min,max])=>s[k]===undefined||(Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max))&&(s.shape===undefined||Object.hasOwn(shapeNames,s.shape))&&(s.shapeFill===undefined||['pattern','solid'].includes(s.shapeFill))&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&(s.transparent===undefined||typeof s.transparent==='boolean')&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
+  function valid(s){return s&&Object.hasOwn(names,s.form)&&SPIRAL_CONTROLS.every(([,k,min,max])=>s[k]===undefined||(Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max))&&(s.spiralArms===undefined||Number.isInteger(s.spiralArms))&&(s.spiralDirection===undefined||['clockwise','counterclockwise'].includes(s.spiralDirection))&&(s.circleLayout===undefined||Object.hasOwn(arrangements,s.circleLayout))&&(s.circleStyle===undefined||['rings','discs','concentric'].includes(s.circleStyle))&&[['circleSize',20,100],['circleSpacing',0,80]].every(([k,min,max])=>s[k]===undefined||(Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max))&&(s.shape===undefined||Object.hasOwn(shapeNames,s.shape))&&(s.shapeFill===undefined||['pattern','solid'].includes(s.shapeFill))&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&(s.transparent===undefined||typeof s.transparent==='boolean')&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
   try{const saved=JSON.parse(localStorage.getItem('glyph-field-v1'));if(valid(saved?.state))state={...defaults,...saved.state};if(['png','svg'].includes(saved?.exportFormat))exportFormat=saved.exportFormat;
     const savedMotion=saved?.motionSettings,t=savedMotion?.transition;
     if(typeof savedMotion?.enabled==='boolean'&&t&&['spring','easing'].includes(t.type)){

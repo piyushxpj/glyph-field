@@ -328,3 +328,7 @@ html[data-input="keyboard"] *, html[data-input="keyboard"] *::before, html[data-
 @media(max-width:700px) { .circle-range { height: 44px; } }
 
 .history-caption strong { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+.form[data-form="spiral"] { grid-column: 1 / -1; }
+#spiral-controls[hidden], #texture-controls[hidden] { display: none; }
+.reference-palette { margin-top: 18px; width: 100%; min-height: 36px; }

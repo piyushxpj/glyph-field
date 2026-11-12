@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
-import { Shuffle, Download, Check, RotateCcw, CornerDownLeft, GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight } from 'lucide-react';
+import { Shuffle, Download, Check, RotateCcw, CornerDownLeft, GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit } from 'lucide-react';
 import { ColorPicker } from './color-picker';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -61,13 +61,15 @@ mount('glyph-picker', <ColorPicker kind="glyph"/>);
 mount('reset-colors-control', <Button id="reset-colors" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset colors</Button>);
 mount('circle-layout-select', <StudioSelect target="circle-layout" label="Circle arrangement"/>);
 mount('circle-style-select', <StudioSelect target="circle-style" label="Circle motif"/>);
+mount('spiral-direction-select', <StudioSelect target="spiral-direction" label="Spiral direction"/>);
+mount('spiral-palette-control', <Button id="spiral-palette" variant="outline" size="sm" className="reference-palette">Use reference palette</Button>);
 mount('shape-select', <StudioSelect target="shape" label="Artwork shape"/>);
 mount('shape-fill-select', <StudioSelect target="shape-fill" label="Shape fill"/>);
 mount('ratio-select', <StudioSelect target="ratio" label="Canvas ratio"/>);
 mount('resolution-select', <StudioSelect target="resolution" label="Export size"/>);
 mount('reset-control', <Button id="reset" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset texture</Button>);
 mount('seed-apply', <Button id="apply-seed" variant="ghost" size="icon" aria-label="Apply seed"><CornerDownLeft aria-hidden="true"/></Button>);
-const icons = { GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight };
+const icons = { GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit };
 for (const element of document.querySelectorAll<HTMLElement>('[data-icon]')) {
   const Icon = icons[element.dataset.icon as keyof typeof icons];
   if (Icon) flushSync(() => createRoot(element).render(<Icon aria-hidden="true" size={18} strokeWidth={1.5}/>));

@@ -48,5 +48,31 @@
       return Number.isFinite(value)?value/short:-1;
     }};
   }
-  root.GlyphShapes={names,geometry,arrangements,circlePattern};
+  function spiralPoints(s,width,height,rnd){
+    const short=Math.min(width,height),cx=width*.5,cy=height*.54;
+    const turns=s.spiralTurns??3.5,arms=s.spiralArms??2,scatter=(s.spiralScatter??55)/100;
+    const dotSize=(s.spiralDotSize??8)*short/750,density=s.spiralDensity??75;
+    const extent=Math.hypot(width*.5,height*.54)+short*.06;
+    const end=turns*Math.PI*2,slope=extent/end,spacing=short*(.025-density*.00018);
+    const direction=s.spiralDirection==='counterclockwise'?-1:1,phase=rnd()*Math.PI*2,points=[];
+    const jitter=()=>((rnd()+rnd()+rnd())/3-.5)*2;
+    function add(x,y,r,accent){if(x+r>=0&&x-r<=width&&y+r>=0&&y-r<=height)points.push({x,y,r,accent});}
+    for(let arm=0;arm<arms;arm++){
+      for(let t=.18;t<end;){
+        const baseRadius=slope*t,angle=direction*t+phase+arm*Math.PI*2/arms;
+        const radius=baseRadius+jitter()*short*.065*scatter;
+        const tangential=jitter()*short*.035*scatter;
+        const x=cx+Math.cos(angle)*radius-Math.sin(angle)*tangential,y=cy+Math.sin(angle)*radius+Math.cos(angle)*tangential;
+        const r=dotSize*(.28+rnd()*.65);
+        // Color collects in loose runs, similar to the reference's two-tone trails.
+        const colorWave=(Math.sin(t*1.3+arm*2.4)+1)/2;
+        const accent=colorWave<(s.spiralAccent??35)/100;
+        add(x,y,r,accent);
+        if(rnd()<scatter*.7)add(x+jitter()*short*.08,y+jitter()*short*.08,r*(.15+rnd()*.4),accent);
+        t+=spacing/Math.hypot(baseRadius,slope)*(.7+rnd()*.6);
+      }
+    }
+    return points;
+  }
+  root.GlyphShapes={names,geometry,arrangements,circlePattern,spiralPoints};
 })(globalThis);

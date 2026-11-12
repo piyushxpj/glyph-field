@@ -9,7 +9,8 @@ const presets = [
   ['Ember','#f49a77'], ['Ice','#9bcddd'],
 ];
 export function ColorPicker({kind='accent'}:{kind?:'accent'|'background'|'glyph'}) {
-  const name=kind==='accent'?'Accent':kind==='background'?'Background':'Glyph';
+  const defaultName=kind==='accent'?'Accent':kind==='background'?'Background':'Glyph';
+  const [name,setName]=useState(defaultName);
   const compactControl=kind!=='accent';
   const inputId=`${kind}-color`;
   const hexId=`${kind}-hex`;
@@ -23,10 +24,10 @@ export function ColorPicker({kind='accent'}:{kind?:'accent'|'background'|'glyph'
   const [error,setError] = useState(false);
   const lastEmitted = useRef('');
   useEffect(()=>{
-    const sync=()=>{setDisabled(native.disabled);if(native.value!==lastEmitted.current){setHex(native.value);setDraft(native.value);setHsv(hexToHsv(native.value));setError(false);}};
+    const sync=()=>{setName(native.dataset.label||defaultName);setDisabled(native.disabled);if(native.value!==lastEmitted.current){setHex(native.value);setDraft(native.value);setHsv(hexToHsv(native.value));setError(false);}};
     document.addEventListener('glyph-field:sync',sync);
     return ()=>document.removeEventListener('glyph-field:sync',sync);
-  },[native]);
+  },[native,defaultName]);
   function commit(next: ReturnType<typeof hexToHsv>) {
     const color=hsvToHex(next);setHsv(next);setHex(color);setDraft(color);setError(false);
     lastEmitted.current=color;native.value=color;native.dispatchEvent(new Event('change',{bubbles:true}));lastEmitted.current='';
@@ -50,7 +51,7 @@ export function ColorPicker({kind='accent'}:{kind?:'accent'|'background'|'glyph'
         <span style={{background:color}}>{hex===color&&<Check size={12} strokeWidth={2.5}/>}</span>
       </button>)}
       <Popover>
-        <PopoverTrigger asChild><Button disabled={disabled} variant="outline" size="icon" className={`custom-color ${compactControl?'color-value-trigger':''}`} aria-label={compactControl?`Choose ${kind} color`:'Choose custom accent color'} title={`${name} color`} data-selected={custom}>{compactControl?<><span className="trigger-color" style={{background:hex}}/><span className="trigger-hex">{hex.toUpperCase()}</span><ChevronDown size={13}/></>:<Plus size={16}/>}</Button></PopoverTrigger>
+        <PopoverTrigger asChild><Button disabled={disabled} variant="outline" size="icon" className={`custom-color ${compactControl?'color-value-trigger':''}`} aria-label={compactControl?`Choose ${name.toLowerCase()} color`:'Choose custom accent color'} title={`${name} color`} data-selected={custom}>{compactControl?<><span className="trigger-color" style={{background:hex}}/><span className="trigger-hex">{hex.toUpperCase()}</span><ChevronDown size={13}/></>:<Plus size={16}/>}</Button></PopoverTrigger>
         <PopoverContent aria-label={`${name} color picker`} side={compact?'top':'right'} align={compact?'end':'center'} sideOffset={12} collisionPadding={12} className="color-popover">
           <div className="color-popover-heading"><span>{name} color</span><span className="color-preview" style={{background:hex}}/></div>
           <div className="color-wheel" role="group" tabIndex={0}
