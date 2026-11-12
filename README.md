@@ -8,8 +8,9 @@ A fast, offline studio for generating organic ASCII artwork. Open `index.html` i
 
 ## Use
 
-- Choose Mycelium, Archipelago, Currents, Contours, or Cellular.
-- In **Shape**, choose Circle, Rounded box, Square, Diamond, Hexagon, Triangle, or Ring. **Freeform** keeps the original edge-to-edge compositions. Shapes stay proportional in every canvas ratio.
+- Choose Mycelium, Archipelago, Currents, Contours, Cellular, or **Circles**.
+- **Circles** builds a pattern from repeated circular motifs. Choose **Symmetric grid**, **Staggered rows**, **Radial symmetry**, or **Asymmetric scatter**. Choose rings, filled circles, or concentric rings, then adjust **Circle size** and **Spacing**. Coverage adjusts ring weight. New composition varies glyph texture; scatter also varies circle positions and sizes. All settings persist and work with PNG/SVG and transparency.
+- In **Frame**, choose Circle, Rounded box, Square, Diamond, Hexagon, Triangle, or Ring. **Freeform** keeps the original edge-to-edge compositions. Shapes stay proportional in every canvas ratio. This optional crop applies to the original organic structures; Circles uses its own repeated layout.
 - Choose **Organic pattern** to contain the existing form inside the silhouette, or **Full glyph fill** for a continuous textured shape. Shape and fill persist in history and settings and apply to both PNG and SVG, including transparent exports. Structure and texture controls vary the interior; the silhouette stays fixed.
 - Click **New composition** (**New** on mobile) or press **Space** outside a control for a fresh composition.
 - Adjust form scale, coverage, glyph size, and letter-mark quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.

@@ -111,3 +111,12 @@ See `POLISH.md` for the review table and motion verdict. This pass supersedes th
 | Only organic forms | Independent Shape and Fill selectors | Recognizable silhouettes retain the existing texture controls |
 | History identified only the structure | Shape appears in labels and accessible names | Makes geometric variations easier to restore |
 | Existing instant artwork changes | Shape changes also update immediately | Keeps repeated exploration responsive |
+
+## Repeated circular patterns — corrected interpretation
+
+- Added Circles as a sixth structure: symmetric grid, staggered rows, radial symmetry, and seeded asymmetric scatter. Motifs are rings, filled circles, or concentric rings. Size and spacing have labeled keyboard-operable sliders.
+- The earlier silhouette feature is labeled Frame and does not clip the Circles structure. Arrangement and motif are included in export filenames and SVG metadata.
+- Geometry tests verify horizontal mirroring for grid/staggered layouts, equal radial distance for satellites, reproducible scatter with varied radii, seed variation, and vector output for all twelve layout/motif combinations.
+- Browser-checked grid, scatter, radial concentric patterns, size/spacing keyboard changes, reload persistence, and 390 px layout without horizontal overflow. Observed preview rendering around 8–18 ms; no warning/error logs.
+- Downloaded radial/concentric SVG; parsed metadata and verified multiple glyph motifs with no silhouette clip. Existing PNG uses the same field renderer as the visible canvas.
+- JavaScript/TypeScript checks, color tests, shape/pattern tests, and production build pass. No new standalone PNG download or physical-device run was performed in this pass.

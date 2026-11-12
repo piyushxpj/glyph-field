@@ -19,18 +19,27 @@
   <main>
     <aside class="controls" aria-label="Artwork controls">
       <div class="intro"><h1>Composition</h1><p>Shape the field. Keep the character.</p></div>
-      <section><div class="section-heading"><h2>Structure</h2><span>5 forms</span></div>
+      <section><div class="section-heading"><h2>Structure</h2><span>6 forms</span></div>
         <div class="forms" role="group" aria-label="Structure">
           <button class="form selected" data-form="mycelium" aria-pressed="true" title="Branching networks"><span class="form-icon" data-icon="GitBranch"></span><span class="form-name">Mycelium</span><span class="form-desc">Branching networks</span></button>
           <button class="form" data-form="islands" aria-pressed="false" title="Scattered landforms"><span class="form-icon" data-icon="CircleDot"></span><span class="form-name">Archipelago</span><span class="form-desc">Scattered landforms</span></button>
           <button class="form" data-form="ribbons" aria-pressed="false" title="Winding channels"><span class="form-icon" data-icon="Waves"></span><span class="form-name">Currents</span><span class="form-desc">Winding channels</span></button>
           <button class="form" data-form="contours" aria-pressed="false" title="Nested elevations"><span class="form-icon" data-icon="Layers"></span><span class="form-name">Contours</span><span class="form-desc">Nested elevations</span></button>
           <button class="form" data-form="cells" aria-pressed="false" title="Organic membranes"><span class="form-icon" data-icon="Hexagon"></span><span class="form-name">Cellular</span><span class="form-desc">Organic membranes</span></button>
+          <button class="form" data-form="circles" aria-pressed="false" title="Repeating circular motifs"><span class="form-icon" data-icon="CircleDot"></span><span class="form-name">Circles</span><span class="form-desc">Repeating circular motifs</span></button>
         </div>
         <p id="structure-description" class="structure-description">Branching networks</p>
       </section>
-      <section class="shape-section" aria-label="Artwork shape">
-        <div class="section-heading"><h2>Shape</h2><span>Contain the pattern</span></div>
+      <section id="circle-controls" class="shape-section" aria-label="Circle pattern" hidden>
+        <div class="section-heading"><h2>Circle pattern</h2><span>Repeated motifs</span></div>
+        <label class="field-label" id="circle-layout-label">Arrangement</label><select id="circle-layout" hidden aria-hidden="true" tabindex="-1"><option value="grid">Symmetric grid</option><option value="staggered">Staggered rows</option><option value="radial">Radial symmetry</option><option value="scatter">Asymmetric scatter</option></select><div id="circle-layout-select"></div>
+        <div class="circle-style-field"><span class="field-label">Motif</span><select id="circle-style" hidden aria-hidden="true" tabindex="-1"><option value="rings">Rings</option><option value="discs">Filled circles</option><option value="concentric">Concentric rings</option></select><div id="circle-style-select"></div></div>
+        <label class="circle-range-label" for="circle-size">Circle size <output id="circle-size-value">60</output></label><input class="circle-range" id="circle-size" type="range" min="20" max="100" value="60">
+        <label class="circle-range-label" for="circle-spacing">Spacing <output id="circle-spacing-value">28</output></label><input class="circle-range" id="circle-spacing" type="range" min="0" max="80" value="28">
+        <p class="structure-description">New composition varies the texture. Scatter also varies circle positions and sizes.</p>
+      </section>
+      <section id="shape-controls" class="shape-section" aria-label="Artwork shape">
+        <div class="section-heading"><h2>Frame</h2><span>Optional crop</span></div>
         <select id="shape" hidden aria-hidden="true" tabindex="-1"><option value="freeform">Freeform</option><option value="circle">Circle</option><option value="rounded">Rounded box</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="hexagon">Hexagon</option><option value="triangle">Triangle</option><option value="ring">Ring</option></select><div id="shape-select"></div>
         <div id="shape-fill-row" class="shape-fill-row" hidden><span class="field-label">Fill</span><select id="shape-fill" hidden aria-hidden="true" tabindex="-1"><option value="pattern">Organic pattern</option><option value="solid">Full glyph fill</option></select><div id="shape-fill-select"></div></div>
         <p id="shape-description" class="structure-description">Let the pattern extend to the canvas edges.</p>

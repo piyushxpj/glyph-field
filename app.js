@@ -2,11 +2,11 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular'};
-  const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes'};
-  const {names:shapeNames,geometry:shapeGeometry}=GlyphShapes;
-  const compositionName=s=>s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
-  const defaults = {form:'mycelium',shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048};
+  const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular',circles:'Circles'};
+  const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes',circles:'Repeating circular motifs'};
+  const {names:shapeNames,geometry:shapeGeometry,arrangements,circlePattern}=GlyphShapes;
+  const compositionName=s=>s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
+  const defaults = {form:'mycelium',circleLayout:'grid',circleStyle:'rings',circleSize:60,circleSpacing:28,shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048};
   let state = {...defaults}, history = [], timer, revision = 0, exportFormat = 'png';
   const art = $('art');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -100,12 +100,14 @@
     }
     if(!s.transparent)rect(0,0,lw,lh,s.background);
     const seed=hash(s.seed),rnd=random(seed),noise=noiseFactory(seed),short=Math.min(lw,lh);
-    const shape=shapeGeometry(s.shape||'freeform',lw,lh);
+    const shape=s.form==='circles'?null:shapeGeometry(s.shape||'freeform',lw,lh);
+    const circular=s.form==='circles'?circlePattern(s,lw,lh,random(seed^0x517cc1b7)):null;
     if(shape&&!vector){ctx.save();ctx.clip(new Path2D(shape.path),'evenodd');}
     const freq=2.2+(90-s.scale)*.051,step=s.detail*.72,cols=Math.ceil(lw/step)+2,rows=Math.ceil(lh/step)+2;
     const mask=new Uint8Array(cols*rows),values=new Float32Array(cols*rows),edges=[];
     const ox=rnd()*90,oy=rnd()*90,coverage=(s.density-48)/100;
     function organicField(x,y){
+      if(circular)return circular.field(x,y);
       const nx=x/short*freq+ox,ny=y/short*freq+oy;
       const wx=nx+noise(nx*.7+12,ny*.7)*.7,wy=ny+noise(nx*.7,ny*.7+39)*.7;
       const n=noise(wx,wy)*.78+noise(wx*2.07+5,wy*2.07)*.19+noise(wx*5.1,wy*5.1)*.047+noise(wx*18.7,wy*18.7)*.017;
@@ -150,10 +152,10 @@
       const i=y*cols+x;if(!mask[i])continue;
       const px=(x-1)*step,py=(y-1)*step;
       const edge=!mask[i-1]||!mask[i+1]||!mask[i-cols]||!mask[i+cols]||!mask[i-cols-1]||!mask[i+cols+1];
-      const texture=noise(px/short*4+15,py/short*4+27)+(shape&&s.shapeFill==='solid'?organicField(px,py)*.7:0);
+      const texture=noise(px/short*(circular?freq:4)+15,py/short*(circular?freq:4)+27)+(shape&&s.shapeFill==='solid'?organicField(px,py)*.7:0);
       if(edge){
         edges.push([px,py]);
-        const ex=px+(rnd()-.5)*step*.5,ey=py+(rnd()-.5)*step*.5;
+        const ex=px+(rnd()-.5)*step*(circular?0:.5),ey=py+(rnd()-.5)*step*(circular?0:.5);
         glyph('⊗',ex,ey,step*1.95,edgeColor);
         glyph('@',ex,ey,step*1.5,edgeColor);
       } else {
@@ -162,7 +164,7 @@
       }
     }
     // Sparse registration marks sit in the negative space.
-    for(let n=0;n<40;n++){
+    for(let n=0;n<(circular?0:40);n++){
       const x=20+rnd()*(lw-40),y=20+rnd()*(lh-40);
       if(field(x,y)>-.055)continue;
       if(n%3===0){
@@ -225,6 +227,9 @@
   }
   function sync(){
     if(dial){syncingDials=true;try{dial.setValues(Object.fromEntries(CONTROL_SPECS.map(c=>[c.path,state[c.key]])));}finally{syncingDials=false;}}
+    $('circle-controls').hidden=state.form!=='circles';$('shape-controls').hidden=state.form==='circles';
+    $('circle-layout').value=state.circleLayout;$('circle-style').value=state.circleStyle;
+    for(const [id,key] of [['circle-size','circleSize'],['circle-spacing','circleSpacing']]){$(id).value=state[key];$(id+'-value').textContent=state[key];}
     $('shape').value=state.shape;$('shape-fill').value=state.shapeFill;$('shape-fill-row').hidden=state.shape==='freeform';$('shape-description').textContent=state.shape==='freeform'?'Let the pattern extend to the canvas edges.':'A centered '+shapeNames[state.shape].toLowerCase()+', filled with glyphs.';
     $('seed').value=state.seed;$('ratio').value=state.ratio;$('resolution').value=state.resolution;
     document.querySelectorAll('.form').forEach(b=>{const on=b.dataset.form===state.form;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on);});
@@ -277,7 +282,8 @@
   document.querySelectorAll('.form').forEach(b=>b.addEventListener('click',()=>{clearTimeout(timer);state.form=b.dataset.form;draw();}));
   for(const [id,key] of [['accent-color','color'],['background-color','background'],['glyph-color','glyph']])$(id).addEventListener('change',()=>{state[key]=$(id).value;draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
   $('transparent-background').addEventListener('change',()=>{clearTimeout(timer);state.transparent=$('transparent-background').checked;draw();});
-  for(const [id,key] of [['shape','shape'],['shape-fill','shapeFill']])$(id).addEventListener('change',()=>{clearTimeout(timer);state[key]=$(id).value;draw();});
+  for(const [id,key] of [['shape','shape'],['shape-fill','shapeFill'],['circle-layout','circleLayout'],['circle-style','circleStyle']])$(id).addEventListener('change',()=>{clearTimeout(timer);state[key]=$(id).value;draw();});
+  for(const [id,key] of [['circle-size','circleSize'],['circle-spacing','circleSpacing']])$(id).addEventListener('input',()=>{state[key]=Number($(id).value);draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
   $('ratio').addEventListener('change',()=>{state.ratio=$('ratio').value;draw();});
   $('resolution').addEventListener('change',()=>{state.resolution=Number($('resolution').value);sync();persist();});
   $('export-format').addEventListener('change',()=>{exportFormat=$('export-format').value;persist();});
@@ -301,13 +307,13 @@
         const canvas=document.createElement('canvas');render(canvas,exportState,exportState.resolution);
         blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG encoding failed');
       }
-      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`glyph-field-${exportState.form}${exportState.shape==='freeform'?'':'-'+exportState.shape}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`glyph-field-${exportState.form}${exportState.form==='circles'?'-'+exportState.circleLayout+'-'+exportState.circleStyle:exportState.shape==='freeform'?'':'-'+exportState.shape}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
       button.dataset.state='done';button.setAttribute('aria-label','Exported artwork');
       if(revision===exportRevision)$('render-status').textContent=format.toUpperCase()+' exported · '+(exportState.transparent?'Transparent · ':'')+(format==='svg'?'Scalable vector':sizeFor(exportState.ratio,exportState.resolution).join(' × '));
     }catch(error){button.dataset.state='idle';$('render-status').textContent='Export failed. Please try again.';console.error(error);}
     finally{button.disabled=false;formatControl.disabled=false;button.removeAttribute('aria-busy');button.setAttribute('aria-label','Export artwork');if(restoreFocus&&document.activeElement===document.body)button.focus({preventScroll:true});exportFeedbackTimer=setTimeout(()=>{button.dataset.state='idle';},1600);}
   });
-  function valid(s){return s&&names[s.form]&&(s.shape===undefined||Object.hasOwn(shapeNames,s.shape))&&(s.shapeFill===undefined||['pattern','solid'].includes(s.shapeFill))&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&(s.transparent===undefined||typeof s.transparent==='boolean')&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
+  function valid(s){return s&&Object.hasOwn(names,s.form)&&(s.circleLayout===undefined||Object.hasOwn(arrangements,s.circleLayout))&&(s.circleStyle===undefined||['rings','discs','concentric'].includes(s.circleStyle))&&[['circleSize',20,100],['circleSpacing',0,80]].every(([k,min,max])=>s[k]===undefined||(Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max))&&(s.shape===undefined||Object.hasOwn(shapeNames,s.shape))&&(s.shapeFill===undefined||['pattern','solid'].includes(s.shapeFill))&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&(s.transparent===undefined||typeof s.transparent==='boolean')&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
   try{const saved=JSON.parse(localStorage.getItem('glyph-field-v1'));if(valid(saved?.state))state={...defaults,...saved.state};if(['png','svg'].includes(saved?.exportFormat))exportFormat=saved.exportFormat;
     const savedMotion=saved?.motionSettings,t=savedMotion?.transition;
     if(typeof savedMotion?.enabled==='boolean'&&t&&['spring','easing'].includes(t.type)){

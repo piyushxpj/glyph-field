@@ -59,6 +59,8 @@ mount('transparency-control', <TransparencyControl/>);
 mount('background-picker', <ColorPicker kind="background"/>);
 mount('glyph-picker', <ColorPicker kind="glyph"/>);
 mount('reset-colors-control', <Button id="reset-colors" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset colors</Button>);
+mount('circle-layout-select', <StudioSelect target="circle-layout" label="Circle arrangement"/>);
+mount('circle-style-select', <StudioSelect target="circle-style" label="Circle motif"/>);
 mount('shape-select', <StudioSelect target="shape" label="Artwork shape"/>);
 mount('shape-fill-select', <StudioSelect target="shape-fill" label="Shape fill"/>);
 mount('ratio-select', <StudioSelect target="ratio" label="Canvas ratio"/>);
