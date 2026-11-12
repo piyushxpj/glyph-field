@@ -33,3 +33,24 @@ Not tested: physical touch hardware, separate Firefox/Safari runs, or changing t
 The artwork keeps Monochrome, Violet, Sage, Ember, and Ice presets. Existing saved colors are preserved; there is no color-removal migration. The custom picker supports pointer capture, keyboard hue/saturation adjustment, three labeled sliders, validated hex input, Escape dismissal, and trigger focus restoration. Preset and custom accent colors are reflected in PNG and SVG exports.
 
 Source components are copied from the official shadcn registry and customized locally. The renderer remains the state owner; native controls and a synchronization event bridge the small React roots. Local UI bundles and upstream notices are included in the offline package.
+
+
+## UI Skills layout and baseline review — November 12, 2026
+
+Used `npx ui-skills start`, then selected `pbakaus/layout` and `ibelick/baseline-ui` from the CLI catalog. The spatial goal is a stable art workspace with direct access to three tasks: pattern, artwork colors, and canvas/export settings. Keep the neutral studio identity and all existing artwork palettes.
+
+| Finding | Implemented change | Evidence |
+| --- | --- | --- |
+| Spiral settings push colors and export settings far below the fold | Pattern / Colors / Canvas navigation using Radix Tabs | All three sections reachable directly; arrow keys change selection and focus |
+| Browser-default circle and spiral sliders have heavy tracks and mismatched thumbs | Shared thin tracks, neutral thumbs, readable numeric values | Desktop and mobile rendered review |
+| History consumes 136 px and crops artwork thumbnails | Compact 108 px history region with contained thumbnails and truncated captions | Desktop portrait preview grows from 400 to 428 px tall at 1280×720 |
+| Mobile aspect-ratio constraints leave the artwork off-center | Explicit stage width with contained canvas | Centered at 320 and 390 px; no document horizontal overflow |
+| Form names use 11 px text and competing fine print | 12 px desktop structure labels, grouped navigation, tighter intra-control rhythm | 1280, 820, 390, and 320 px review |
+| Mobile focus order visits inspector before the preview shown above it | Preview precedes inspector in DOM; desktop uses named grid areas | Source order follows mobile reading order; preview remains primary |
+| Updates can combine new HTML with cached old assets | Version changed CSS and UI/app scripts | Reload presents the current inspector |
+
+Spacing follows the existing 4 px rhythm: 4/8 inside controls, 16/24 between tasks. The preview leads, inspector supports, and history stays secondary. Related settings share one panel instead of one long scroll. Panels remain mounted so the native renderer bridge, color pickers, and DialKit preserve state. No new animation was added; existing keyboard and reduced-motion overrides remain.
+
+Mechanical inspection covered grid minimums, overflow, hidden panels, focus outlines, sticky stacking, safe-area insets, text truncation, and touch targets. The CLI-delivered layout document references an `impeccable detect` script through an unresolved `{{scripts_path}}` placeholder; that executable was not supplied by ui-skills, so no detector result is claimed. Source inspection and rendered DOM measurements were used instead.
+
+Verified: build, TypeScript/syntax, existing color and geometry/export tests; color-wheel hex application, preserved accent after tab switches, background hex application and reload persistence, transparency toggle, circle/spiral switching, canvas ratio selection, arrow-key tabs, and 44 px mobile tab targets. At 320 and 820 px, document scroll width equals viewport width. Mobile picker stays within the viewport. Long history titles truncate while full names remain in accessible labels/tooltips. No renderer or export implementation changes were made. Physical touch hardware, separate Firefox/Safari runs, OS reduced-motion switching, and localization were not tested.

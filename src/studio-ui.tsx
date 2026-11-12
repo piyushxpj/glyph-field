@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
+import { Tabs } from 'radix-ui';
 import { Shuffle, Download, Check, RotateCcw, CornerDownLeft, GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit } from 'lucide-react';
 import { ColorPicker } from './color-picker';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,18 @@ function mount(id: string, element: React.ReactNode) {
   const target = document.getElementById(id);
   if (target) flushSync(() => createRoot(target).render(element));
 }
+// Keep panels mounted so native renderer bridges, picker state, and DialKit
+// survive navigation. Radix owns tab semantics, roving focus, and arrow keys.
+const inspectorPanels = ['pattern', 'colors', 'canvas'].map(value => ({
+  value,
+  html: document.querySelector(`[data-inspector-panel="${value}"]`)!.innerHTML,
+}));
+mount('inspector', <Tabs.Root defaultValue="pattern" className="inspector-tabs">
+  <Tabs.List className="inspector-nav" aria-label="Composition controls">
+    {inspectorPanels.map(({value}) => <Tabs.Trigger key={value} value={value} className="inspector-tab">{value[0].toUpperCase() + value.slice(1)}</Tabs.Trigger>)}
+  </Tabs.List>
+  {inspectorPanels.map(({value, html}) => <Tabs.Content key={value} value={value} forceMount className="inspector-panel" dangerouslySetInnerHTML={{__html: html}}/>)}
+</Tabs.Root>);
 mount('toolbar', <Toolbar/>);
 mount('palette', <ColorPicker/>);
 mount('transparency-control', <TransparencyControl/>);

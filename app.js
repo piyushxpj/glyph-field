@@ -39,7 +39,7 @@
     animateUI(art,{opacity:[.88,1],scale:[.998,1]});
   }
   function positionSelection(animate=true){
-    const button=forms.querySelector('.selected');if(!button)return;
+    const button=forms.querySelector('.selected');if(!button||!button.offsetWidth)return;
     const x=button.offsetLeft,y=button.offsetTop;
     const position=[x,y,button.offsetWidth,button.offsetHeight].join(':');
     if(position===selectionPosition)return;
