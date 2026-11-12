@@ -9,7 +9,7 @@ const output = join(root, 'dist');
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 
-for (const name of ['index.html', 'style.css', 'app.js']) {
+for (const name of ['index.html', 'style.css', 'app.js', 'shapes.js']) {
   await copyFile(join(root, name), join(output, name));
 }
 // An extracted offline package does not contain another copy of itself.

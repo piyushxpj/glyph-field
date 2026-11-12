@@ -311,3 +311,9 @@ html[data-input="keyboard"] *, html[data-input="keyboard"] *::before, html[data-
   .transparency-switch { position: relative; }
   .transparency-switch::before { content:''; position:absolute; inset:-12px -5px; }
 }
+
+.shape-section .studio-select { width: 100%; }
+.shape-fill-row { margin-top: 12px; display: grid; grid-template-columns: 32px 1fr; align-items: center; gap: 8px; }
+.shape-fill-row[hidden] { display: none; }
+.shape-fill-row > div { min-width: 0; }
+#art-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -96,3 +96,18 @@ See `POLISH.md` for the review table and motion verdict. This pass supersedes th
 - Opened both exported files side by side over a gradient and visually checked glyphs, accents, and transparent negative space.
 - Checked desktop at 1280 × 900 and mobile at 390 × 844, with no horizontal overflow. Checkerboard fits the displayed image. No browser warning/error logs.
 - JavaScript/TypeScript checks, color utility tests, and production build pass. Separate SVG-editor and physical-device testing were not performed.
+
+## Geometric shapes (2026-11-12)
+
+- Added Freeform, Circle, Rounded box, Square, Diamond, Hexagon, Triangle, and Ring, with Organic pattern or Full glyph fill. Freeform remains the default for older saved compositions.
+- Shared shape paths clip both canvas and SVG. Even-odd clipping keeps the ring center empty. Shape/fill persist in settings and history and appear in composition labels and export metadata.
+- Automated checks cover every shape across all four aspect ratios with opaque and transparent SVG output; all pass.
+- Browser-checked circle with both fills, rounded box, ring, reload persistence, history restore, and mobile controls at 390 px without horizontal overflow. No browser warnings/errors.
+- Downloaded transparent ring SVG and verified metadata and even-odd clip path. Downloaded 1638 × 2048 RGBA PNG: 589,418 visible pixels, with zero pixels beyond the ring boundary or inside its hole (2 px antialias tolerance).
+- JavaScript/TypeScript, color tests, shape tests, and production build pass. Separate SVG-editor and physical-device testing were not performed.
+
+| Before | After | Why |
+| --- | --- | --- |
+| Only organic forms | Independent Shape and Fill selectors | Recognizable silhouettes retain the existing texture controls |
+| History identified only the structure | Shape appears in labels and accessible names | Makes geometric variations easier to restore |
+| Existing instant artwork changes | Shape changes also update immediately | Keeps repeated exploration responsive |

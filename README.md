@@ -9,6 +9,8 @@ A fast, offline studio for generating organic ASCII artwork. Open `index.html` i
 ## Use
 
 - Choose Mycelium, Archipelago, Currents, Contours, or Cellular.
+- In **Shape**, choose Circle, Rounded box, Square, Diamond, Hexagon, Triangle, or Ring. **Freeform** keeps the original edge-to-edge compositions. Shapes stay proportional in every canvas ratio.
+- Choose **Organic pattern** to contain the existing form inside the silhouette, or **Full glyph fill** for a continuous textured shape. Shape and fill persist in history and settings and apply to both PNG and SVG, including transparent exports. Structure and texture controls vary the interior; the silhouette stays fixed.
 - Click **New composition** (**New** on mobile) or press **Space** outside a control for a fresh composition.
 - Adjust form scale, coverage, glyph size, and letter-mark quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.
 - Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn preview motion off. Motion feedback honors the system reduced-motion preference. Artwork accent controls remain beneath the texture controls.
@@ -34,6 +36,7 @@ The renderer creates seeded, domain-warped noise fields, classifies foreground c
 
 - `index.html` — accessible studio controls and preview
 - `style.css` — responsive layout
+- `shapes.js` — shared geometry for canvas clipping and scalable SVG paths
 - `app.js` — seeded renderer, export, local history, DialKit binding, and Motion feedback
 - `vendor/` — local DialKit 2.2.0 and Motion 14.12.0 browser bundles, styles, and licenses
 - `src/` — shadcn components, React control adapters, color picker, and color conversions

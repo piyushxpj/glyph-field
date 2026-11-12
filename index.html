@@ -29,6 +29,12 @@
         </div>
         <p id="structure-description" class="structure-description">Branching networks</p>
       </section>
+      <section class="shape-section" aria-label="Artwork shape">
+        <div class="section-heading"><h2>Shape</h2><span>Contain the pattern</span></div>
+        <select id="shape" hidden aria-hidden="true" tabindex="-1"><option value="freeform">Freeform</option><option value="circle">Circle</option><option value="rounded">Rounded box</option><option value="square">Square</option><option value="diamond">Diamond</option><option value="hexagon">Hexagon</option><option value="triangle">Triangle</option><option value="ring">Ring</option></select><div id="shape-select"></div>
+        <div id="shape-fill-row" class="shape-fill-row" hidden><span class="field-label">Fill</span><select id="shape-fill" hidden aria-hidden="true" tabindex="-1"><option value="pattern">Organic pattern</option><option value="solid">Full glyph fill</option></select><div id="shape-fill-select"></div></div>
+        <p id="shape-description" class="structure-description">Let the pattern extend to the canvas edges.</p>
+      </section>
       <section class="texture" aria-label="Live texture and motion controls">
         <div id="dial-panel"></div>
         <div id="reset-control"></div>
@@ -56,6 +62,7 @@
   <script src="vendor/dialkit.js"></script>
   <script src="vendor/motion.js"></script>
   <script src="vendor/ui.js"></script>
+  <script src="shapes.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
