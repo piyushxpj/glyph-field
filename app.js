@@ -2,8 +2,8 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular',circles:'Circles',spiral:'Spiral'};
-  const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes',circles:'Repeating circular motifs',spiral:'Scattered dotted spirals'};
+  const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular',circles:'Circles',spiral:'Spiral',blob:'Organism',wave:'Drift',tendril:'Filament',cluster:'Colony'};
+  const descriptions={mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes',circles:'Repeating circular motifs',spiral:'Scattered dotted spirals',blob:'Single organic form',wave:'Flowing ribbon',tendril:'Confined branches',cluster:'Scattered fragments'};
   const {names:shapeNames,geometry:shapeGeometry,arrangements,circlePattern,spiralPoints}=GlyphShapes;
   const compositionName=s=>s.form==='spiral'?'Spiral':s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
   const defaults = {form:'mycelium',spiralTurns:3.5,spiralArms:2,spiralScatter:55,spiralDotSize:8,spiralDensity:75,spiralAccent:35,spiralDirection:'clockwise',circleLayout:'grid',circleStyle:'rings',circleSize:60,circleSpacing:28,shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048};
@@ -116,11 +116,21 @@
     const freq=2.2+(90-s.scale)*.051,step=s.detail*.72,cols=Math.ceil(lw/step)+2,rows=Math.ceil(lh/step)+2;
     const mask=new Uint8Array(cols*rows),values=new Float32Array(cols*rows),edges=[];
     const ox=rnd()*90,oy=rnd()*90,coverage=(s.density-48)/100;
+    const isIsolated=['blob','wave','tendril','cluster'].includes(s.form);
+    let isoP;
+    if(s.form==='blob')isoP={cx:lw*.5+(rnd()-.5)*lw*.12,cy:lh*.5+(rnd()-.5)*lh*.12,r:short*(.28+coverage*.12)};
+    else if(s.form==='wave'){const a=rnd()*Math.PI*.5-Math.PI*.25;isoP={cos:Math.cos(a),sin:Math.sin(a),w:short*(.08+coverage*.06)};}
+    else if(s.form==='tendril')isoP={cx:lw*.5+(rnd()-.5)*lw*.1,cy:lh*.5+(rnd()-.5)*lh*.1,r:short*(.3+coverage*.12)};
+    else if(s.form==='cluster'){const cc=[];for(let i=0,n=3+Math.floor(rnd()*5);i<n;i++)cc.push({x:lw*.15+rnd()*lw*.7,y:lh*.15+rnd()*lh*.7,r:short*(.06+rnd()*.08),ox:rnd()*100,oy:rnd()*100});isoP={cc};}
     function organicField(x,y){
       if(circular)return circular.field(x,y);
+      if(s.form==='blob'){const dx=x-isoP.cx,dy=y-isoP.cy,dist=Math.sqrt(dx*dx+dy*dy)/isoP.r;return .6+noise(x/short*3+ox,y/short*3+oy)*.25+noise(x/short*5.5+5,y/short*5.5+11)*.1+coverage*.2-dist;}
+      if(s.form==='wave'){const rwx=(x-lw*.5)*isoP.cos+(y-lh*.5)*isoP.sin,rwy=-(x-lw*.5)*isoP.sin+(y-lh*.5)*isoP.cos,spine=noise(rwx/short*1.8+ox,oy)*short*.22+noise(rwx/short*3.5+3,oy+7)*short*.08,wm=1+noise(rwx/short*2.5+50,oy+50)*.3,dist=Math.abs(rwy-spine)/(isoP.w*wm),ef=Math.pow(Math.abs(rwx)/(short*.5),4);return .5+coverage*.3-dist-Math.max(ef,0);}
+      if(s.form==='cluster'){let best=-1;for(const c of isoP.cc){const dx=x-c.x,dy=y-c.y,dist=Math.sqrt(dx*dx+dy*dy)/c.r,v=.55+noise(x/short*4+c.ox,y/short*4+c.oy)*.25-dist;if(v>best)best=v;}return best+coverage*.15;}
       const nx=x/short*freq+ox,ny=y/short*freq+oy;
       const wx=nx+noise(nx*.7+12,ny*.7)*.7,wy=ny+noise(nx*.7,ny*.7+39)*.7;
       const n=noise(wx,wy)*.78+noise(wx*2.07+5,wy*2.07)*.19+noise(wx*5.1,wy*5.1)*.047+noise(wx*18.7,wy*18.7)*.017;
+      if(s.form==='tendril'){const dx=x-isoP.cx,dy=y-isoP.cy,dist=Math.sqrt(dx*dx+dy*dy)/isoP.r,mask=.65+noise(x/short*2.5+ox+30,y/short*2.5+oy+30)*.15-dist;return Math.min(.175+coverage*.38-Math.abs(n+.055),mask);}
       if(s.form==='islands')return n-(.065-coverage*.85);
       if(s.form==='ribbons')return .19+coverage*.4-Math.abs(n+.16*Math.sin(wy*2.2));
       if(s.form==='contours')return .23+coverage*.55-Math.abs(Math.sin(n*13));
@@ -174,7 +184,7 @@
       }
     }
     // Sparse registration marks sit in the negative space.
-    for(let n=0;n<(circular?0:40);n++){
+    for(let n=0;n<(circular?0:isIsolated?8:40);n++){
       const x=20+rnd()*(lw-40),y=20+rnd()*(lh-40);
       if(field(x,y)>-.055)continue;
       if(n%3===0){

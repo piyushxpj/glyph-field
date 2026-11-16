@@ -67,6 +67,7 @@ section { min-width: 0; }
 .form-desc { display: none; }
 .form.selected { background: transparent; color: #e0e0e0; border-color: transparent; }
 .structure-selection { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; border-radius: 6px; background: #303030; border: 1px solid #505050; }
+.form-group-label { grid-column: 1 / -1; font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 6px 0 2px; border-top: 1px solid var(--line); margin-top: 2px; }
 .structure-description { color: var(--muted); font-size: 11px; margin: 10px 0 0; line-height: 1.5; }
 .palette-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-top: 16px; }
 .swatches { display: flex; gap: 2px; }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import { Tabs } from 'radix-ui';
-import { Shuffle, Download, Check, RotateCcw, CornerDownLeft, GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit } from 'lucide-react';
+import { Shuffle, Download, Check, RotateCcw, CornerDownLeft, GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit, Fingerprint, Wind, Sprout, Sparkles } from 'lucide-react';
 import { ColorPicker } from './color-picker';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -82,7 +82,7 @@ mount('ratio-select', <StudioSelect target="ratio" label="Canvas ratio"/>);
 mount('resolution-select', <StudioSelect target="resolution" label="Export size"/>);
 mount('reset-control', <Button id="reset" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset texture</Button>);
 mount('seed-apply', <Button id="apply-seed" variant="ghost" size="icon" aria-label="Apply seed"><CornerDownLeft aria-hidden="true"/></Button>);
-const icons = { GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit };
+const icons = { GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit, Fingerprint, Wind, Sprout, Sparkles };
 for (const element of document.querySelectorAll<HTMLElement>('[data-icon]')) {
   const Icon = icons[element.dataset.icon as keyof typeof icons];
   if (Icon) flushSync(() => createRoot(element).render(<Icon aria-hidden="true" size={18} strokeWidth={1.5}/>));
