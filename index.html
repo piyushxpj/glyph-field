@@ -7,7 +7,7 @@
   <title>Glyph Field — ASCII image studio</title>
   <link rel="stylesheet" href="vendor/dialkit.css">
   <link rel="stylesheet" href="vendor/ui.css">
-  <link rel="stylesheet" href="style.css?v=studio-4">
+  <link rel="stylesheet" href="style.css?v=studio-5">
 </head>
 <body>
   <header class="topbar">
@@ -99,14 +99,17 @@
         </div>
         <p id="graph-series-note" class="structure-description">One graph, one color. Add more to compare side by side or layer them.</p>
       </section>
-      <section aria-label="Graph pixels">
-        <div class="section-heading"><h2>Pixels</h2><span>Dither</span></div>
+      <section aria-label="Graph style">
+        <div class="section-heading"><h2>Style</h2><span>Render</span></div>
+        <div class="control-row"><span class="field-label">Style</span><select id="graph-style" hidden aria-hidden="true" tabindex="-1"><option value="glyph">Glyph field</option><option value="pixel">Pixel dither</option></select><div id="graph-style-select"></div></div>
+        <div id="graph-pixel-only" hidden>
         <div class="control-row"><span class="field-label">Dither</span><select id="graph-dither" hidden aria-hidden="true" tabindex="-1"><option value="bayer">Ordered</option><option value="scatter">Scatter</option><option value="halftone">Halftone</option></select><div id="graph-dither-select"></div></div>
         <div class="control-row"><span class="field-label">Cell</span><select id="graph-cell" hidden aria-hidden="true" tabindex="-1"><option value="square">Square</option><option value="gapped">Gapped grid</option><option value="dot">Round dots</option></select><div id="graph-cell-select"></div></div>
         <div class="control-row"><span class="field-label">Edge</span><select id="graph-edge" hidden aria-hidden="true" tabindex="-1"><option value="glow">Bright edge</option><option value="solid">Solid edge</option><option value="none">No edge</option></select><div id="graph-edge-select"></div></div>
-        <label class="circle-range-label" for="graph-pixel">Pixel size <output id="graph-pixel-value">6</output></label><input class="circle-range" id="graph-pixel" type="range" min="3" max="14" step="1" value="6">
+        </div>
+        <label class="circle-range-label" for="graph-pixel"><span id="graph-pixel-name">Glyph size</span> <output id="graph-pixel-value">6</output></label><input class="circle-range" id="graph-pixel" type="range" min="3" max="14" step="1" value="6">
         <label class="circle-range-label" for="graph-fade">Falloff <output id="graph-fade-value">45</output></label><input class="circle-range" id="graph-fade" type="range" min="0" max="100" step="1" value="45">
-        <label class="circle-range-label" for="graph-stars">Sparkle <output id="graph-stars-value">30</output></label><input class="circle-range" id="graph-stars" type="range" min="0" max="100" step="1" value="30">
+        <label class="circle-range-label" for="graph-stars"><span id="graph-stars-name">Marks</span> <output id="graph-stars-value">30</output></label><input class="circle-range" id="graph-stars" type="range" min="0" max="100" step="1" value="30">
         <div id="reset-graph-control"></div>
       </section>
       </div>
@@ -137,9 +140,9 @@
   </main>
   <script src="vendor/dialkit.js"></script>
   <script src="vendor/motion.js"></script>
-  <script src="vendor/ui.js?v=studio-2"></script>
+  <script src="vendor/ui.js?v=studio-5"></script>
   <script src="shapes.js"></script>
-  <script src="graph.js"></script>
-  <script src="app.js?v=studio-4"></script>
+  <script src="graph.js?v=studio-6"></script>
+  <script src="app.js?v=studio-6"></script>
 </body>
 </html>

@@ -3,6 +3,7 @@ window.GlyphGraph = (() => {
   'use strict';
   const profileNames = {mixed:'Mixed', peaks:'Peaks', ramp:'Ramp', wave:'Wave', steps:'Steps', walk:'Random walk'};
   const palettes = {
+    field:{name:'Field', colors:['#dbdbdb','#9c9c9c','#ededed','#7c7c7c']},
     reference:{name:'Reference', colors:['#e8443a','#3b7de8','#8b62ec','#3ccf8e']},
     sunset:{name:'Sunset', colors:['#ff6b4a','#ffb547','#ff4f8b','#ffd86b']},
     ocean:{name:'Ocean', colors:['#2ec4d6','#3b7de8','#5b5ff0','#8fe3ff']},
@@ -65,33 +66,61 @@ window.GlyphGraph = (() => {
     return h;
   }
   // paint(x, y, size, color, round) draws one cell in a 1500 px reference frame.
-  function draw(s, W, H, rnd, paint) {
-    const p = s.graphPixel, count = s.graphSeries, stacked = s.graphLayout === 'stack' || count === 1;
-    const colors = [s.series1, s.series2, s.series3, s.series4];
+  // Shared geometry for both styles: series spans and column heights on a p-sized grid.
+  function layout(s, W, H, rnd, p) {
+    const count = s.graphSeries, stacked = s.graphLayout === 'stack' || count === 1;
     const snap = v => Math.round(v / p) * p;
     // Width caps the band so charts stay strip-like on portrait canvases.
     const bandRows = Math.max(4, Math.round(Math.min(H * .8, W * .5) * s.graphHeight / 100 / p));
     const tailRows = Math.max(3, Math.round(bandRows * .2));
     const baseline = snap(H * .5 + (bandRows - tailRows) * p * .5);
     const margin = W * .06, usable = W - margin * 2;
-    const gamma = .35 + s.graphFade / 100 * 2.2;
     const gap = stacked ? 0 : usable * s.graphGap / 400;
     const weights = Array.from({length:count}, () => .6 + rnd() * .8);
     const total = weights.reduce((a, b) => a + b, 0);
     const kinds = ['peaks','ramp','peaks','walk','wave'];
+    const series = [];
     let cursor = margin;
-    const round = s.graphCell === 'dot', inset = s.graphCell === 'gapped' ? p * .12 : 0;
-    function cell(x, y, size, color) {
-      const offset = (p - size) / 2 + inset;
-      paint(x + offset, y + offset, size - inset * 2, color, round);
-    }
     for (let i = 0; i < count; i++) {
       const width = stacked ? usable : (usable - gap * (count - 1)) * weights[i] / total;
       const x0 = snap(cursor), cols = Math.max(2, Math.floor(width / p));
       cursor += stacked ? 0 : width + gap;
       const kind = s.graphProfile === 'mixed' ? kinds[Math.floor(rnd() * kinds.length)] : s.graphProfile;
-      const heights = profile(kind, cols, s.graphRough / 100, rnd);
-      const amp = stacked && count > 1 ? 1 - i * .2 : 1;
+      series.push({x0, cols, heights:profile(kind, cols, s.graphRough / 100, rnd), amp:stacked && count > 1 ? 1 - i * .2 : 1, nx:rnd() * 60, ny:rnd() * 60});
+    }
+    return {series, baseline, bandRows, tailRows, gamma:.35 + s.graphFade / 100 * 2.2};
+  }
+  // Glyph style: the chart becomes a field. Positive inside the curve; the
+  // falloff breaks into noise-shaped islands so the fade reads as organic.
+  function mask(s, W, H, rnd, noise, p) {
+    const {series, baseline, bandRows, tailRows, gamma} = layout(s, W, H, rnd, p);
+    const short = Math.min(W, H), end = baseline + tailRows * p * 2.4, soft = gamma * .75;
+    function sample(sr, x, y) {
+      const f = (x - sr.x0) / p;
+      if (f < 0 || f > sr.cols - 1 || y > end) return -1;
+      const i = Math.floor(f), u = f - i;
+      const h = sr.heights[i] * (1 - u) + sr.heights[Math.min(sr.cols - 1, i + 1)] * u;
+      const top = baseline - h * sr.amp * bandRows * p;
+      if (y < top) return -1;
+      const density = Math.pow(1 - (y - top) / (end - top), soft);
+      const n = noise(x / short * 14 + sr.nx, y / short * 14 + sr.ny) * .65 + noise(x / short * 34 + sr.ny, y / short * 34 + sr.nx) * .35;
+      return density - (.42 + .5 * n);
+    }
+    return {
+      field(x, y) { let best = -1; for (const sr of series) best = Math.max(best, sample(sr, x, y)); return best < 0 ? best * .25 : best * .3; },
+      owner(x, y) { for (let i = series.length - 1; i > 0; i--) if (sample(series[i], x, y) > 0) return i; return 0; },
+    };
+  }
+  function draw(s, W, H, rnd, paint) {
+    const p = s.graphPixel;
+    const colors = [s.series1, s.series2, s.series3, s.series4];
+    const {series, baseline, bandRows, tailRows, gamma} = layout(s, W, H, rnd, p);
+    const round = s.graphCell === 'dot', inset = s.graphCell === 'gapped' ? p * .12 : 0;
+    function cell(x, y, size, color) {
+      const offset = (p - size) / 2 + inset;
+      paint(x + offset, y + offset, size - inset * 2, color, round);
+    }
+    series.forEach(({x0, cols, heights, amp}, i) => {
       const base = colors[i], shades = [0,1,2,3,4,5].map(level => mix(base, s.background, level / 6 * .72));
       const highlight = mix(base, '#ffffff', .38), star = mix(base, '#ffffff', .78);
       const tops = new Int32Array(cols);
@@ -113,7 +142,7 @@ window.GlyphGraph = (() => {
         const c = Math.floor(rnd() * cols), depth = (baseline - tops[c]) / p + tailRows + 3;
         cell(x0 + c * p, tops[c] + (2 + Math.floor(rnd() * depth)) * p, p, star);
       }
-    }
+    });
   }
-  return {profileNames, palettes, draw};
+  return {profileNames, palettes, draw, mask};
 })();

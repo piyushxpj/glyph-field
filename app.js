@@ -8,10 +8,10 @@
   const {profileNames,palettes:graphPalettes,draw:drawGraph}=GlyphGraph;
   const compositionName=s=>s.mode==='graph'?`Graph · ${profileNames[s.graphProfile]}`:s.form==='spiral'?'Spiral':s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
   const defaults = {form:'mycelium',spiralTurns:3.5,spiralArms:2,spiralScatter:55,spiralDotSize:8,spiralDensity:75,spiralAccent:35,spiralDirection:'clockwise',circleLayout:'grid',circleStyle:'rings',circleSize:60,circleSpacing:28,shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048,
-    mode:'field',graphProfile:'peaks',graphLayout:'row',graphDither:'bayer',graphCell:'gapped',graphEdge:'glow',graphSeries:1,graphGap:30,graphHeight:55,graphRough:30,graphPixel:6,graphFade:35,graphStars:30,
-    series1:'#e8443a',series2:'#3b7de8',series3:'#8b62ec',series4:'#3ccf8e'};
+    mode:'field',graphStyle:'glyph',graphProfile:'peaks',graphLayout:'row',graphDither:'bayer',graphCell:'gapped',graphEdge:'glow',graphSeries:1,graphGap:30,graphHeight:55,graphRough:30,graphPixel:6,graphFade:35,graphStars:30,
+    series1:'#dbdbdb',series2:'#9c9c9c',series3:'#ededed',series4:'#7c7c7c'};
   const GRAPH_CONTROLS=[['series','graphSeries',1,4],['gap','graphGap',0,80],['height','graphHeight',20,90],['rough','graphRough',0,100],['pixel','graphPixel',3,14],['fade','graphFade',0,100],['stars','graphStars',0,100]];
-  const GRAPH_SELECTS=[['graph-profile','graphProfile',Object.keys(profileNames)],['graph-layout','graphLayout',['row','stack']],['graph-dither','graphDither',['bayer','scatter','halftone']],['graph-cell','graphCell',['square','gapped','dot']],['graph-edge','graphEdge',['glow','solid','none']]];
+  const GRAPH_SELECTS=[['graph-style','graphStyle',['glyph','pixel']],['graph-profile','graphProfile',Object.keys(profileNames)],['graph-layout','graphLayout',['row','stack']],['graph-dither','graphDither',['bayer','scatter','halftone']],['graph-cell','graphCell',['square','gapped','dot']],['graph-edge','graphEdge',['glow','solid','none']]];
   const SERIES=[1,2,3,4].map(i=>'series'+i);
   const graphOnly=k=>k.startsWith('graph')||SERIES.includes(k);
   const SPIRAL_CONTROLS=[['turns','spiralTurns',1,7],['arms','spiralArms',1,5],['scatter','spiralScatter',0,100],['dot-size','spiralDotSize',2,14],['density','spiralDensity',20,100],['accent','spiralAccent',0,100]];
@@ -108,7 +108,8 @@
     }
     if(!s.transparent)rect(0,0,lw,lh,s.background);
     const seed=hash(s.seed),rnd=random(seed),noise=noiseFactory(seed),short=Math.min(lw,lh);
-    if(s.mode==='graph'){
+    const graph=s.mode==='graph';
+    if(graph&&s.graphStyle==='pixel'){
       drawGraph(s,lw,lh,rnd,(x,y,size,color,round)=>{
         if(!round)return rect(x,y,size,size,color);
         const r=size/2;
@@ -118,7 +119,7 @@
       if(vector)return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${lw} ${lh}" overflow="hidden" shape-rendering="crispEdges"><title>${escapeXML(compositionName(s)+' — '+s.seed)}</title><desc>Seeded pixel-dithered chart. Editable vector cells.</desc><metadata>${escapeXML(JSON.stringify(s))}</metadata>${parts.join('')}</svg>`;
       return Math.round(performance.now()-start);
     }
-    if(s.form==='spiral'){
+    if(s.form==='spiral'&&!graph){
       const points=spiralPoints(s,lw,lh,rnd);
       for(const p of points){const color=p.accent?s.color:s.glyph;
         if(vector)parts.push(`<circle cx="${number(p.x)}" cy="${number(p.y)}" r="${number(p.r)}" fill="${color}"/>`);
@@ -127,10 +128,10 @@
       if(vector)return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${lw} ${lh}" overflow="hidden"><title>Spiral — ${escapeXML(s.seed)}</title><desc>Seeded dotted spiral trails. Editable vector circles.</desc><metadata>${escapeXML(JSON.stringify(s))}</metadata>${parts.join('')}</svg>`;
       return Math.round(performance.now()-start);
     }
-    const shape=s.form==='circles'?null:shapeGeometry(s.shape||'freeform',lw,lh);
-    const circular=s.form==='circles'?circlePattern(s,lw,lh,random(seed^0x517cc1b7)):null;
+    const shape=s.form==='circles'||graph?null:shapeGeometry(s.shape||'freeform',lw,lh);
+    const circular=s.form==='circles'&&!graph?circlePattern(s,lw,lh,random(seed^0x517cc1b7)):null;
     if(shape&&!vector){ctx.save();ctx.clip(new Path2D(shape.path),'evenodd');}
-    const freq=2.2+(90-s.scale)*.051,step=s.detail*.72,cols=Math.ceil(lw/step)+2,rows=Math.ceil(lh/step)+2;
+    const freq=2.2+(90-s.scale)*.051,step=graph?s.graphPixel*1.08:s.detail*.72,cols=Math.ceil(lw/step)+2,rows=Math.ceil(lh/step)+2;
     const mask=new Uint8Array(cols*rows),values=new Float32Array(cols*rows),edges=[];
     const ox=rnd()*90,oy=rnd()*90,coverage=(s.density-48)/100;
     const isIsolated=['blob','wave','tendril','cluster'].includes(s.form);
@@ -139,7 +140,9 @@
     else if(s.form==='wave'){const a=rnd()*Math.PI*.5-Math.PI*.25;isoP={cos:Math.cos(a),sin:Math.sin(a),w:short*(.08+coverage*.06)};}
     else if(s.form==='tendril')isoP={cx:lw*.5+(rnd()-.5)*lw*.1,cy:lh*.5+(rnd()-.5)*lh*.1,r:short*(.3+coverage*.12)};
     else if(s.form==='cluster'){const cc=[];for(let i=0,n=3+Math.floor(rnd()*5);i<n;i++)cc.push({x:lw*.15+rnd()*lw*.7,y:lh*.15+rnd()*lh*.7,r:short*(.06+rnd()*.08),ox:rnd()*100,oy:rnd()*100});isoP={cc};}
+    const graphField=graph?GlyphGraph.mask(s,lw,lh,rnd,noise,step):null;
     function organicField(x,y){
+      if(graphField)return graphField.field(x,y);
       if(circular)return circular.field(x,y);
       if(s.form==='blob'){const dx=x-isoP.cx,dy=y-isoP.cy,dist=Math.sqrt(dx*dx+dy*dy)/isoP.r;return .6+noise(x/short*3+ox,y/short*3+oy)*.25+noise(x/short*5.5+5,y/short*5.5+11)*.1+coverage*.2-dist;}
       if(s.form==='wave'){const rwx=(x-lw*.5)*isoP.cos+(y-lh*.5)*isoP.sin,rwy=-(x-lw*.5)*isoP.sin+(y-lh*.5)*isoP.cos,spine=noise(rwx/short*1.8+ox,oy)*short*.22+noise(rwx/short*3.5+3,oy+7)*short*.08,wm=1+noise(rwx/short*2.5+50,oy+50)*.3,dist=Math.abs(rwy-spine)/(isoP.w*wm),ef=Math.pow(Math.abs(rwx)/(short*.5),4);return .5+coverage*.3-dist-Math.max(ef,0);}
@@ -184,10 +187,12 @@
       if(vector){parts.push(`<text x="${number(x)}" y="${number(y+.25)}" font-size="${number(size)}" font-weight="${size>step*1.3?600:500}" fill="${color}">${escapeXML(ch)}</text>`);return;}
       const {tile,box}=stamp(ch,size,color);ctx.drawImage(tile,x-box/2,y-box/2,box,box);
     }
-    const shades=[shade(s.glyph,194/219),shade(s.glyph,208/219),s.glyph],edgeColor=shade(s.glyph,215/219),markColor=shade(s.glyph,168/219);
+    const glyphSet=c=>[shade(c,194/219),shade(c,208/219),c,shade(c,215/219)];
+    const markColor=shade(s.glyph,168/219),fieldGlyphs=glyphSet(s.glyph),seriesGlyphs=graph?SERIES.map(k=>glyphSet(s[k])):null;
     for(let y=1;y<rows-1;y++)for(let x=1;x<cols-1;x++){
       const i=y*cols+x;if(!mask[i])continue;
       const px=(x-1)*step,py=(y-1)*step;
+      const set=seriesGlyphs?seriesGlyphs[graphField.owner(px,py)]:fieldGlyphs,shades=set,edgeColor=set[3];
       const edge=!mask[i-1]||!mask[i+1]||!mask[i-cols]||!mask[i+cols]||!mask[i-cols-1]||!mask[i+cols+1];
       const texture=noise(px/short*(circular?freq:4)+15,py/short*(circular?freq:4)+27)+(shape&&s.shapeFill==='solid'?organicField(px,py)*.7:0);
       if(edge){
@@ -201,7 +206,7 @@
       }
     }
     // Sparse registration marks sit in the negative space.
-    for(let n=0;n<(circular?0:isIsolated?8:40);n++){
+    for(let n=0;n<(graph?Math.round(s.graphStars*.5):circular?0:isIsolated?8:40);n++){
       const x=20+rnd()*(lw-40),y=20+rnd()*(lh-40);
       if(field(x,y)>-.055)continue;
       if(n%3===0){
@@ -213,7 +218,7 @@
     // Oversized, repeated letter fragments make the occasional typographic glitch.
     const letters='ssttrreewwxxllkkaaoohh',cutouts=[],accentGlyphs=[];
     let transparentDefs='';
-    for(let n=0;n<Math.round(s.accent*.68);n++){
+    for(let n=0;n<Math.round((graph?s.graphStars:s.accent)*.68);n++){
       if(!edges.length)break;
       const [x,y]=edges[Math.floor(rnd()*edges.length)],size=step*(1.8+rnd()*.6),ch=letters[Math.floor(rnd()*letters.length)];
       const vertical=rnd()>.55,length=2+Math.floor(rnd()*4);
@@ -265,7 +270,10 @@
   function sync(){
     if(dial){syncingDials=true;try{dial.setValues(Object.fromEntries(CONTROL_SPECS.map(c=>[c.path,state[c.key]])));}finally{syncingDials=false;}}
     const graph=state.mode==='graph';
-    $('field-controls').hidden=graph;$('graph-controls').hidden=!graph;$('graph-colors').hidden=!graph;$('glyph-picker').hidden=graph;$('palette').hidden=graph;
+    $('field-controls').hidden=graph;$('graph-controls').hidden=!graph;$('graph-colors').hidden=!graph;$('glyph-picker').hidden=graph;
+    const glyphGraph=graph&&state.graphStyle==='glyph';$('palette').hidden=graph&&!glyphGraph;$('graph-pixel-only').hidden=state.graphStyle!=='pixel';
+    $('graph-pixel-name').textContent=state.graphStyle==='pixel'?'Pixel size':'Glyph size';$('graph-stars-name').textContent=state.graphStyle==='pixel'?'Sparkle':'Marks';
+    $('accent-color').dataset.label=glyphGraph?'Letter':'Accent';
     document.querySelectorAll('.mode-tab').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===state.mode)));
     for(const [id,key] of GRAPH_CONTROLS){$('graph-'+id).value=state[key];$('graph-'+id+'-value').textContent=state[key];}
     for(const [id,key] of GRAPH_SELECTS)$(id).value=state[key];
@@ -296,7 +304,7 @@
   // Hidden settings from the other mode must not split otherwise identical history entries.
   function key(s){
     const {resolution,...visual}=s;
-    const keep=s.mode==='graph'?k=>graphOnly(k)||['mode','seed','ratio','background','transparent'].includes(k):k=>!graphOnly(k);
+    const keep=s.mode==='graph'?k=>graphOnly(k)||['mode','seed','ratio','background','transparent','color'].includes(k):k=>!graphOnly(k);
     return JSON.stringify(Object.fromEntries(Object.entries(visual).filter(([k])=>keep(k))));
   }
   function paintRange(el){el.style.setProperty('--fill',((el.value-el.min)/(el.max-el.min)*100)+'%');}
@@ -331,7 +339,7 @@
   function draw(save=true){
     if(tuneFrame){cancelAnimationFrame(tuneFrame);tuneFrame=0;}
     revision++;sync();const ms=render(art,state);fitChecker();$('render-status').textContent=`Rendered in ${ms} ms`;
-    if(state.mode==='graph')art.setAttribute('aria-label',`${compositionName(state)}: pixel-dithered chart with ${state.graphSeries} series, seed ${state.seed}, on a ${state.transparent?'transparent':state.background} background.`);
+    if(state.mode==='graph')art.setAttribute('aria-label',`${compositionName(state)}: ${state.graphStyle==='pixel'?'pixel-dithered':'ASCII glyph'} chart with ${state.graphSeries} series, seed ${state.seed}, on a ${state.transparent?'transparent':state.background} background.`);
     else art.setAttribute('aria-label',`${compositionName(state)}: ${state.form==='spiral'?'dotted spiral':'ASCII'} artwork, seed ${state.seed}, with ${state.glyph} ${state.form==='spiral'?'dots':'glyphs'}, ${state.color} accents, and a ${state.transparent?'transparent':state.background} background.`);
     if(save)remember();else{showHistory();persist();}
   }
@@ -351,6 +359,11 @@
   $('generate').addEventListener('click',generate);
   $('reset').addEventListener('click',()=>{clearTimeout(timer);for(const k of ['scale','density','detail','accent'])state[k]=defaults[k];draw();});
   $('reset-colors').addEventListener('click',()=>{clearTimeout(timer);for(const key of ['background','glyph','color','transparent',...SERIES])state[key]=defaults[key];draw();});
+  $('graph-style').addEventListener('change',()=>{
+    // Each style has a natural starting palette; only swap it while the user hasn't picked their own.
+    const from=graphPalettes[state.graphStyle==='pixel'?'reference':'field'].colors,to=graphPalettes[state.graphStyle==='pixel'?'field':'reference'].colors;
+    if(SERIES.every((k,i)=>state[k]===from[i]))SERIES.forEach((k,i)=>{state[k]=to[i];});
+  });
   document.querySelectorAll('.mode-tab').forEach(b=>b.addEventListener('click',()=>{if(state.mode===b.dataset.mode)return;clearTimeout(timer);state.mode=b.dataset.mode;draw();}));
   for(const [id,key] of GRAPH_CONTROLS)$('graph-'+id).addEventListener('input',()=>{state[key]=Number($('graph-'+id).value);draw(false);clearTimeout(timer);timer=setTimeout(remember,350);});
   for(const [id,key] of GRAPH_SELECTS)$(id).addEventListener('change',()=>{clearTimeout(timer);state[key]=$(id).value;draw();});

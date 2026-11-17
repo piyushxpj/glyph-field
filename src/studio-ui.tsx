@@ -71,6 +71,7 @@ mount('transparency-control', <TransparencyControl/>);
 mount('background-picker', <ColorPicker kind="background"/>);
 mount('glyph-picker', <ColorPicker kind="glyph"/>);
 for (const i of [1, 2, 3, 4]) mount(`series${i}-picker`, <ColorPicker kind={`series${i}`} label={`Series ${i}`}/>);
+mount('graph-style-select', <StudioSelect target="graph-style" label="Graph style"/>);
 mount('graph-profile-select', <StudioSelect target="graph-profile" label="Graph curve"/>);
 mount('graph-layout-select', <StudioSelect target="graph-layout" label="Graph layout"/>);
 mount('graph-dither-select', <StudioSelect target="graph-dither" label="Dither style"/>);
