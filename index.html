@@ -2,30 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#171717">
-  <meta name="description" content="Create organic ASCII artwork instantly. Shape the texture, explore seeded compositions, and export PNG or editable SVG.">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Create organic ASCII artwork and pixel-dithered graphs instantly. Shape the texture, explore seeded compositions, and export PNG or editable SVG.">
   <title>Glyph Field — ASCII image studio</title>
   <link rel="stylesheet" href="vendor/dialkit.css">
   <link rel="stylesheet" href="vendor/ui.css">
-  <link rel="stylesheet" href="style.css?v=inspector-4">
+  <link rel="stylesheet" href="style.css?v=studio-4">
 </head>
 <body>
   <header class="topbar">
-    <a class="wordmark" href="./" aria-label="Glyph Field home">Glyph Field<span class="version">STUDIO</span></a>
+    <a class="wordmark" href="./" aria-label="Glyph Field home"><span class="wordmark-mark" aria-hidden="true">✣</span>Glyph Field</a>
+    <div class="mode-switch" role="group" aria-label="Studio mode">
+      <button type="button" class="mode-tab" data-mode="field" aria-pressed="true">Field</button>
+      <button type="button" class="mode-tab" data-mode="graph" aria-pressed="false">Graph</button>
+    </div>
     <span class="top-note">Organic forms, drawn in type.</span>
     <select id="export-format" hidden aria-hidden="true" tabindex="-1"><option value="png">PNG</option><option value="svg">SVG</option></select>
-    <div id="toolbar"></div>
   </header>
   <main>
+    <aside class="library" aria-label="Recent compositions">
+      <div class="panel-heading"><h2>Library</h2><span id="history-count">01</span></div>
+      <p class="library-note">Recent compositions. Select to restore.</p>
+      <div id="history" class="history"></div>
+    </aside>
     <section class="workspace" aria-label="Image preview">
       <div class="preview-top"><div><span id="art-title">MYCELIUM</span><span class="slash">/</span><span class="seed-prefix">Seed</span><span id="seed-display">781204</span></div><span id="dimensions">1638 × 2048</span></div>
       <div class="art-stage"><div id="transparency-grid" aria-hidden="true"></div><canvas id="art" width="800" height="1000" role="img" aria-label="Generated organic ASCII artwork with white and gray glyphs on charcoal"></canvas></div>
+      <div id="toolbar" class="dock"></div>
       <div class="preview-bottom"><span class="preview-label"><i aria-hidden="true"></i>Live preview</span><span id="render-status" role="status" aria-live="polite">Ready</span></div>
-      <div class="history-header"><h2>Recent compositions <span id="history-count">01</span></h2><span>Select to restore</span></div><div id="history" class="history" aria-label="Recent compositions"></div>
     </section>
     <aside class="controls" aria-label="Artwork controls">
-      <div class="intro"><h1>Composition</h1><p>Shape the field. Make it yours.</p></div>
       <div id="inspector"><div data-inspector-panel="pattern">
+      <div id="field-controls">
       <section><div class="section-heading"><h2>Structure</h2><span>11 forms</span></div>
         <div class="forms" role="group" aria-label="Structure">
           <button class="form selected" data-form="mycelium" aria-pressed="true" title="Branching networks"><span class="form-icon" data-icon="GitBranch"></span><span class="form-name">Mycelium</span><span class="form-desc">Branching networks</span></button>
@@ -45,15 +53,15 @@
       </section>
       <section id="circle-controls" class="shape-section" aria-label="Circle pattern" hidden>
         <div class="section-heading"><h2>Circle pattern</h2><span>Repeated motifs</span></div>
-        <label class="field-label" id="circle-layout-label">Arrangement</label><select id="circle-layout" hidden aria-hidden="true" tabindex="-1"><option value="grid">Symmetric grid</option><option value="staggered">Staggered rows</option><option value="radial">Radial symmetry</option><option value="scatter">Asymmetric scatter</option></select><div id="circle-layout-select"></div>
-        <div class="circle-style-field"><span class="field-label">Motif</span><select id="circle-style" hidden aria-hidden="true" tabindex="-1"><option value="rings">Rings</option><option value="discs">Filled circles</option><option value="concentric">Concentric rings</option></select><div id="circle-style-select"></div></div>
+        <div class="control-row"><span class="field-label" id="circle-layout-label">Arrangement</span><select id="circle-layout" hidden aria-hidden="true" tabindex="-1"><option value="grid">Symmetric grid</option><option value="staggered">Staggered rows</option><option value="radial">Radial symmetry</option><option value="scatter">Asymmetric scatter</option></select><div id="circle-layout-select"></div></div>
+        <div class="control-row"><span class="field-label">Motif</span><select id="circle-style" hidden aria-hidden="true" tabindex="-1"><option value="rings">Rings</option><option value="discs">Filled circles</option><option value="concentric">Concentric rings</option></select><div id="circle-style-select"></div></div>
         <label class="circle-range-label" for="circle-size">Circle size <output id="circle-size-value">60</output></label><input class="circle-range" id="circle-size" type="range" min="20" max="100" value="60">
         <label class="circle-range-label" for="circle-spacing">Spacing <output id="circle-spacing-value">28</output></label><input class="circle-range" id="circle-spacing" type="range" min="0" max="80" value="28">
         <p class="structure-description">New composition varies the texture. Scatter also varies circle positions and sizes.</p>
       </section>
       <section id="spiral-controls" class="shape-section" aria-label="Spiral pattern" hidden>
         <div class="section-heading"><h2>Spiral pattern</h2><span>Dotted trails</span></div>
-        <select id="spiral-direction" hidden aria-hidden="true" tabindex="-1"><option value="clockwise">Clockwise</option><option value="counterclockwise">Counterclockwise</option></select><div id="spiral-direction-select"></div>
+        <div class="control-row"><span class="field-label">Direction</span><select id="spiral-direction" hidden aria-hidden="true" tabindex="-1"><option value="clockwise">Clockwise</option><option value="counterclockwise">Counterclockwise</option></select><div id="spiral-direction-select"></div></div>
         <label class="circle-range-label" for="spiral-turns">Turns <output id="spiral-turns-value">3.5</output></label><input class="circle-range" id="spiral-turns" type="range" min="1" max="7" step="0.5" value="3.5">
         <label class="circle-range-label" for="spiral-arms">Arms <output id="spiral-arms-value">2</output></label><input class="circle-range" id="spiral-arms" type="range" min="1" max="5" step="1" value="2">
         <label class="circle-range-label" for="spiral-scatter">Scatter <output id="spiral-scatter-value">55</output></label><input class="circle-range" id="spiral-scatter" type="range" min="0" max="100" step="1" value="55">
@@ -73,6 +81,35 @@
         <div id="dial-panel"></div>
         <div id="reset-control"></div>
       </section>
+      </div>
+      <div id="graph-controls" hidden>
+      <section aria-label="Graph profile">
+        <div class="section-heading"><h2>Profile</h2><span>Chart shape</span></div>
+        <div class="control-row"><span class="field-label">Curve</span><select id="graph-profile" hidden aria-hidden="true" tabindex="-1"><option value="mixed">Mixed</option><option value="peaks">Peaks</option><option value="ramp">Ramp</option><option value="wave">Wave</option><option value="steps">Steps</option><option value="walk">Random walk</option></select><div id="graph-profile-select"></div></div>
+        <label class="circle-range-label" for="graph-height">Height <output id="graph-height-value">55</output></label><input class="circle-range" id="graph-height" type="range" min="20" max="90" step="1" value="55">
+        <label class="circle-range-label" for="graph-rough">Roughness <output id="graph-rough-value">30</output></label><input class="circle-range" id="graph-rough" type="range" min="0" max="100" step="1" value="30">
+        <p class="structure-description">Shuffle reshapes the line. Mixed picks a random curve for each graph.</p>
+      </section>
+      <section aria-label="Multiple graphs">
+        <div class="section-heading"><h2>Series</h2><span>Optional</span></div>
+        <label class="circle-range-label" for="graph-series">Graphs <output id="graph-series-value">1</output></label><input class="circle-range" id="graph-series" type="range" min="1" max="4" step="1" value="1">
+        <div id="graph-multi" hidden>
+          <div class="control-row graph-layout-row"><span class="field-label">Layout</span><select id="graph-layout" hidden aria-hidden="true" tabindex="-1"><option value="row">Side by side</option><option value="stack">Layered</option></select><div id="graph-layout-select"></div></div>
+          <label class="circle-range-label" for="graph-gap">Gap <output id="graph-gap-value">30</output></label><input class="circle-range" id="graph-gap" type="range" min="0" max="80" step="1" value="30">
+        </div>
+        <p id="graph-series-note" class="structure-description">One graph, one color. Add more to compare side by side or layer them.</p>
+      </section>
+      <section aria-label="Graph pixels">
+        <div class="section-heading"><h2>Pixels</h2><span>Dither</span></div>
+        <div class="control-row"><span class="field-label">Dither</span><select id="graph-dither" hidden aria-hidden="true" tabindex="-1"><option value="bayer">Ordered</option><option value="scatter">Scatter</option><option value="halftone">Halftone</option></select><div id="graph-dither-select"></div></div>
+        <div class="control-row"><span class="field-label">Cell</span><select id="graph-cell" hidden aria-hidden="true" tabindex="-1"><option value="square">Square</option><option value="gapped">Gapped grid</option><option value="dot">Round dots</option></select><div id="graph-cell-select"></div></div>
+        <div class="control-row"><span class="field-label">Edge</span><select id="graph-edge" hidden aria-hidden="true" tabindex="-1"><option value="glow">Bright edge</option><option value="solid">Solid edge</option><option value="none">No edge</option></select><div id="graph-edge-select"></div></div>
+        <label class="circle-range-label" for="graph-pixel">Pixel size <output id="graph-pixel-value">6</output></label><input class="circle-range" id="graph-pixel" type="range" min="3" max="14" step="1" value="6">
+        <label class="circle-range-label" for="graph-fade">Falloff <output id="graph-fade-value">45</output></label><input class="circle-range" id="graph-fade" type="range" min="0" max="100" step="1" value="45">
+        <label class="circle-range-label" for="graph-stars">Sparkle <output id="graph-stars-value">30</output></label><input class="circle-range" id="graph-stars" type="range" min="0" max="100" step="1" value="30">
+        <div id="reset-graph-control"></div>
+      </section>
+      </div>
       </div><div data-inspector-panel="colors">
       <section aria-label="Artwork colors" class="artwork-colors">
         <div class="section-heading"><h2>Colors</h2><span>Artwork only</span></div>
@@ -80,10 +117,18 @@
         <input id="background-color" type="hidden" value="#181818"><div id="background-picker"></div>
         <input id="glyph-color" type="hidden" value="#dbdbdb"><div id="glyph-picker"></div>
         <input id="accent-color" type="hidden" value="#eeeeee"><div id="palette"></div>
+        <div id="graph-colors" hidden>
+          <span class="field-label palette-label">Palette</span>
+          <div id="graph-palettes" class="graph-palettes" role="group" aria-label="Graph palettes"></div>
+          <input id="series1-color" type="hidden" value="#e8443a"><div id="series1-picker"></div>
+          <input id="series2-color" type="hidden" value="#3b7de8"><div id="series2-picker"></div>
+          <input id="series3-color" type="hidden" value="#8b62ec"><div id="series3-picker"></div>
+          <input id="series4-color" type="hidden" value="#3ccf8e"><div id="series4-picker"></div>
+        </div>
         <div id="reset-colors-control"></div>
       </section>
       </div><div data-inspector-panel="canvas">
-      <section><div class="section-heading"><h2>Canvas</h2></div><div class="canvas-options"><div class="canvas-option"><span class="field-label">Ratio</span><select id="ratio" hidden aria-hidden="true" tabindex="-1"><option value="4:5">Portrait · 4:5</option><option value="1:1">Square · 1:1</option><option value="16:9">Landscape · 16:9</option><option value="9:16">Story · 9:16</option></select><div id="ratio-select"></div></div><div class="canvas-option"><span class="field-label">Export size</span><select id="resolution" hidden aria-hidden="true" tabindex="-1"><option value="2048">2K · 2048 px</option><option value="4096">4K · 4096 px</option></select><div id="resolution-select"></div></div></div>
+      <section><div class="section-heading"><h2>Canvas</h2><span>Output</span></div><div class="canvas-options"><div class="canvas-option"><span class="field-label">Ratio</span><select id="ratio" hidden aria-hidden="true" tabindex="-1"><option value="4:5">Portrait · 4:5</option><option value="1:1">Square · 1:1</option><option value="16:9">Landscape · 16:9</option><option value="9:16">Story · 9:16</option></select><div id="ratio-select"></div></div><div class="canvas-option"><span class="field-label">Export size</span><select id="resolution" hidden aria-hidden="true" tabindex="-1"><option value="2048">2K · 2048 px</option><option value="4096">4K · 4096 px</option></select><div id="resolution-select"></div></div></div>
         <label class="seed-label" for="seed">Seed <span>Repeat a composition</span></label><div class="seed-wrap"><input id="seed" value="781204" maxlength="24" spellcheck="false" aria-label="Composition seed"><span id="seed-apply"></span></div>
       </section>
       </div></div>
@@ -92,8 +137,9 @@
   </main>
   <script src="vendor/dialkit.js"></script>
   <script src="vendor/motion.js"></script>
-  <script src="vendor/ui.js?v=inspector-1"></script>
+  <script src="vendor/ui.js?v=studio-2"></script>
   <script src="shapes.js"></script>
-  <script src="app.js?v=inspector-1"></script>
+  <script src="graph.js"></script>
+  <script src="app.js?v=studio-4"></script>
 </body>
 </html>

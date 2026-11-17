@@ -8,8 +8,8 @@ const presets = [
   ['Monochrome','#eeeeee'], ['Violet','#b980e8'], ['Sage','#b9d89c'],
   ['Ember','#f49a77'], ['Ice','#9bcddd'],
 ];
-export function ColorPicker({kind='accent'}:{kind?:'accent'|'background'|'glyph'}) {
-  const defaultName=kind==='accent'?'Accent':kind==='background'?'Background':'Glyph';
+export function ColorPicker({kind='accent',label}:{kind?:string;label?:string}) {
+  const defaultName=label??(kind==='accent'?'Accent':kind==='background'?'Background':'Glyph');
   const [name,setName]=useState(defaultName);
   const compactControl=kind!=='accent';
   const inputId=`${kind}-color`;

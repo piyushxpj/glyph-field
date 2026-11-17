@@ -38,8 +38,7 @@ function TransparencyControl() {
 }
 function Toolbar() {
   return <>
-    <Button id="generate" variant="outline" className="generate"><Shuffle aria-hidden="true"/>New composition<kbd>Space</kbd></Button>
-    <Button id="generate-quick" variant="outline" className="quick-generate" aria-label="Generate new image"><Shuffle aria-hidden="true"/><span>New</span></Button>
+    <Button id="generate" variant="ghost" className="generate" aria-label="New composition"><Shuffle aria-hidden="true"/>Shuffle<kbd>Space</kbd></Button>
     <div className="export-controls">
       <StudioSelect target="export-format" label="Export format" className="format-select" />
       <Button id="download" className="export" data-state="idle" aria-label="Export artwork">
@@ -71,6 +70,13 @@ mount('palette', <ColorPicker/>);
 mount('transparency-control', <TransparencyControl/>);
 mount('background-picker', <ColorPicker kind="background"/>);
 mount('glyph-picker', <ColorPicker kind="glyph"/>);
+for (const i of [1, 2, 3, 4]) mount(`series${i}-picker`, <ColorPicker kind={`series${i}`} label={`Series ${i}`}/>);
+mount('graph-profile-select', <StudioSelect target="graph-profile" label="Graph curve"/>);
+mount('graph-layout-select', <StudioSelect target="graph-layout" label="Graph layout"/>);
+mount('graph-dither-select', <StudioSelect target="graph-dither" label="Dither style"/>);
+mount('graph-cell-select', <StudioSelect target="graph-cell" label="Pixel cell"/>);
+mount('graph-edge-select', <StudioSelect target="graph-edge" label="Top edge"/>);
+mount('reset-graph-control', <Button id="reset-graph" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset graph</Button>);
 mount('reset-colors-control', <Button id="reset-colors" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset colors</Button>);
 mount('circle-layout-select', <StudioSelect target="circle-layout" label="Circle arrangement"/>);
 mount('circle-style-select', <StudioSelect target="circle-style" label="Circle motif"/>);
