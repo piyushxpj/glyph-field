@@ -1,19 +1,39 @@
 # Glyph Field
 
-A fast, offline studio for generating organic ASCII artwork. Open `index.html` in a modern browser. The included browser bundles work without an install, API key, server, or network requests.
+A fast, offline studio for generating organic ASCII artwork and glyph-drawn graphs. Open `index.html` in a modern browser. The included browser bundles work without an install, API key, server, or network requests.
+
+The studio has two modes, switched at the top left:
+
+- **Field** — organic glyph patterns, from full-canvas networks to single isolated shapes.
+- **Graph** — seeded area charts drawn either in the Field glyph style or as pixel dither.
 
 ![Glyph Field studio](studio-preview.jpg)
 
 [Open the live studio](https://glyph-field.vercel.app) · [Download the offline tool](glyph-field-offline.zip) · [Example SVG](examples/mycelium-978573.svg)
 
-## Use
+## Run it
 
-- Choose Mycelium, Archipelago, Currents, Contours, Cellular, **Circles**, or **Spiral**.
+No install is needed to use the studio. Either open `index.html` directly, or serve the folder:
+
+```bash
+python3 -m http.server 4187
+```
+
+Then open http://localhost:4187. To change the React UI or rebuild bundles, see [Development](#development).
+
+## Layout
+
+The studio has three columns: **Library** (recent compositions) on the left, the canvas in the middle, and the inspector on the right with **Pattern**, **Colors**, and **Canvas** tabs. Under the canvas, a dock holds **Shuffle**, the export format, and **Export**. On narrower screens the Library moves under the canvas; on phones the order is canvas, Library, then controls.
+
+## Field mode
+
+- Choose Mycelium, Archipelago, Currents, Contours, Cellular, **Circles**, or **Spiral** for patterns that fill the canvas.
+- Under **Isolated**, choose a single floating shape with negative space around it: **Organism** (one organic blob), **Drift** (a flowing ribbon with tapered ends), **Filament** (branching networks confined to an organic region), or **Colony** (scattered small fragments). Shuffle produces a new variation of the same shape type. Density sets the shape's size or thickness, and all texture and color controls still apply.
 - **Spiral** creates dotted winding trails inspired by a scattered, two-tone reference. Adjust turns, arms, scatter, dot size, dot density, accent mix, and direction. **Use reference palette** applies lavender dots, pink accents, and a light gray background; all three colors remain editable. The glyph picker becomes **Dot color** in this mode. Transparent PNG and editable-circle SVG exports preserve the same composition.
 - **Circles** builds a pattern from repeated circular motifs. Choose **Symmetric grid**, **Staggered rows**, **Radial symmetry**, or **Asymmetric scatter**. Choose rings, filled circles, or concentric rings, then adjust **Circle size** and **Spacing**. Coverage adjusts ring weight. New composition varies glyph texture; scatter also varies circle positions and sizes. All settings persist and work with PNG/SVG and transparency.
 - In **Frame**, choose Circle, Rounded box, Square, Diamond, Hexagon, Triangle, or Ring. **Freeform** keeps the original edge-to-edge compositions. Shapes stay proportional in every canvas ratio. This optional crop applies to the original organic structures; Circles uses its own repeated layout.
 - Choose **Organic pattern** to contain the existing form inside the silhouette, or **Full glyph fill** for a continuous textured shape. Shape and fill persist in history and settings and apply to both PNG and SVG, including transparent exports. Structure and texture controls vary the interior; the silhouette stays fixed.
-- Click **New composition** (**New** on mobile) or press **Space** outside a control for a fresh composition.
+- Click **Shuffle** or press **Space** outside a control for a fresh composition. This works in both modes.
 - Adjust form scale, coverage, glyph size, and letter-mark quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.
 - Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn preview motion off. Motion feedback honors the system reduced-motion preference. Artwork accent controls remain beneath the texture controls.
 - Set **Background color** and **Glyph color** independently in the Colors section. Both offer the same color wheel, brightness controls, and hex entry. Glyphs retain subtle tonal variation for texture. **Reset colors** resets the whole palette; **Reset texture** leaves colors alone.
@@ -28,24 +48,60 @@ A fast, offline studio for generating organic ASCII artwork. Open `index.html` i
 - Revisit up to eight recent compositions. Settings and history persist locally when browser storage is available.
 - Enter a seed to repeat a composition. Exact reproduction requires the same seed and all the same controls. Font rendering can vary between browsers and operating systems.
 
+## Graph mode
+
+Switch to **Graph** at the top left. Graphs share the seed, canvas ratio, export, transparency, and history with Field mode. Landscape 16:9 suits them best; on portrait canvases the chart height is capped so it still reads as a strip.
+
+**Profile**
+
+- **Curve** — Peaks, Ramp, Wave, Steps, Random walk, or Mixed (a random curve for each graph).
+- **Height** — how tall the chart band is.
+- **Roughness** — how busy the line is: more peaks, steps, or wobble.
+
+**Series**
+
+- **Graphs** — one graph by default. Raise it to 2–4 to compare several.
+- **Layout** — **Side by side** (each graph in its own span) or **Layered** (graphs overlap on one baseline, back to front). Shown only with more than one graph.
+- **Gap** — space between side-by-side graphs.
+
+**Style**
+
+- **Glyph field** (default) draws the chart with the Field engine. The area under the curve fills with Field glyphs, the top of the curve is traced with the `⊗ @` outline, and the base fades through an ordered dither to a flat baseline. Grain, vignette, and sparse crosshair and dot-grid marks carry over; letter fragments are left out.
+- **Pixel dither** draws square pixel cells with a gradient fade, plus these extra options:
+  - **Dither** — Ordered, Scatter, or Halftone.
+  - **Cell** — Square, Gapped grid, or Round dots.
+  - **Edge** — Bright, Solid, or no edge.
+- **Glyph size** / **Pixel size** — size of each cell.
+- **Falloff** — how quickly the fill fades toward the baseline.
+- **Marks** / **Sparkle** — crosshairs and dot grids in Glyph style; scattered bright pixels in Pixel style.
+- **Reset graph** restores the graph controls and leaves colors alone.
+
+**Colors**
+
+- Seven palette presets — Field, Reference, Sunset, Ocean, Toxic, Mono, and Candy — set every series at once.
+- Each graph has its own color picker (**Graph color** for a single graph, **Series 1–4** for several). Background and transparency work as in Field mode.
+- Switching style swaps between the Field and Reference palettes, but only while you haven't picked your own colors.
+
+Exports work as in Field mode. Glyph-style SVGs keep glyphs as editable text; Pixel-style SVGs use one vector shape per cell. Graph filenames start with `glyph-field-graph-`.
+
 ## Style study
 
 The reference combines a near-black charcoal ground; irregular, branching positive shapes; tiny monospaced texture zones; thick, pale `@` and ring-like edge glyphs; sparse enlarged violet letter fragments; and occasional crosshairs or dot arrays in the negative space. Composition is cropped at the edges, with substantial breathing room. This implementation approximates that visual language procedurally rather than reproducing the source pixel for pixel.
 
-The renderer creates seeded, domain-warped noise fields, classifies foreground cells, finds their boundaries, stamps cached glyphs, and adds sparse accents and grain. Five field functions produce distinct families within the same visual language. Generation time is measured and shown beneath the preview. Export rerenders at the chosen resolution.
+The renderer creates seeded, domain-warped noise fields, classifies foreground cells, finds their boundaries, stamps cached glyphs, and adds sparse accents and grain. Field functions produce distinct families within the same visual language; isolated forms add a distance falloff so a single shape floats in empty space, and glyph-style graphs supply a curve-shaped mask to the same pipeline. Generation time is measured and shown beneath the preview. Export rerenders at the chosen resolution.
 
 ## Files
 
 - `index.html` — accessible studio controls and preview
 - `style.css` — responsive layout
 - `shapes.js` — shared geometry for canvas clipping and scalable SVG paths
+- `graph.js` — graph curves, series layout, the pixel-dither renderer, and the mask that feeds glyph-style graphs into the field renderer
 - `app.js` — seeded renderer, export, local history, DialKit binding, and Motion feedback
 - `vendor/` — local DialKit 2.2.0 and Motion 14.12.0 browser bundles, styles, and licenses
 - `src/` — shadcn components, React control adapters, color picker, and color conversions
 - `scripts/build-ui.mjs` — bundles the component UI and collects dependency license notices
 - `scripts/sync-vendor.mjs` — refreshes DialKit and Motion browser bundles
-
-To serve locally, run `python3 -m http.server 4187` from this directory and open `http://localhost:4187`.
+- `scripts/build-static.mjs` — builds the `dist/` deployment; add any new top-level script to its file list
 
 ## Design verification
 
