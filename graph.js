@@ -90,11 +90,11 @@ window.GlyphGraph = (() => {
     }
     return {series, baseline, bandRows, tailRows, gamma:.35 + s.graphFade / 100 * 2.2};
   }
-  // Glyph style: the chart becomes a field. Positive inside the curve; the
-  // falloff breaks into noise-shaped islands so the fade reads as organic.
+  // Glyph style: the chart becomes a field mask over the area under the curve,
+  // down to a flat end line. density() fades from 1 at the curve to 0 there.
   function mask(s, W, H, rnd, noise, p) {
     const {series, baseline, bandRows, tailRows, gamma} = layout(s, W, H, rnd, p);
-    const short = Math.min(W, H), end = baseline + tailRows * p * 2.4, soft = gamma * .75;
+    const end = baseline + tailRows * p * 1.6;
     function sample(sr, x, y) {
       const f = (x - sr.x0) / p;
       if (f < 0 || f > sr.cols - 1 || y > end) return -1;
@@ -102,15 +102,16 @@ window.GlyphGraph = (() => {
       const h = sr.heights[i] * (1 - u) + sr.heights[Math.min(sr.cols - 1, i + 1)] * u;
       const top = baseline - h * sr.amp * bandRows * p;
       if (y < top) return -1;
-      const density = Math.pow(1 - (y - top) / (end - top), soft);
-      const n = noise(x / short * 14 + sr.nx, y / short * 14 + sr.ny) * .65 + noise(x / short * 34 + sr.ny, y / short * 34 + sr.nx) * .35;
-      return density - (.42 + .5 * n);
+      return Math.max(.001, Math.pow(1 - (y - top) / (end - top), gamma));
     }
+    function owner(x, y) { for (let i = series.length - 1; i > 0; i--) if (sample(series[i], x, y) > 0) return i; return 0; }
     return {
-      field(x, y) { let best = -1; for (const sr of series) best = Math.max(best, sample(sr, x, y)); return best < 0 ? best * .25 : best * .3; },
-      owner(x, y) { for (let i = series.length - 1; i > 0; i--) if (sample(series[i], x, y) > 0) return i; return 0; },
+      field(x, y) { let best = -1; for (const sr of series) best = Math.max(best, sample(sr, x, y)); return best < 0 ? -.25 : .05 + best * .25; },
+      owner,
+      density(x, y) { return Math.max(0, sample(series[owner(x, y)], x, y)); },
     };
   }
+  const bayer = (gx, gy) => BAYER[(gx & 3) + (gy & 3) * 4];
   function draw(s, W, H, rnd, paint) {
     const p = s.graphPixel;
     const colors = [s.series1, s.series2, s.series3, s.series4];
@@ -144,5 +145,5 @@ window.GlyphGraph = (() => {
       }
     });
   }
-  return {profileNames, palettes, draw, mask};
+  return {profileNames, palettes, draw, mask, bayer};
 })();

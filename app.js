@@ -192,8 +192,12 @@
     for(let y=1;y<rows-1;y++)for(let x=1;x<cols-1;x++){
       const i=y*cols+x;if(!mask[i])continue;
       const px=(x-1)*step,py=(y-1)*step;
-      const set=seriesGlyphs?seriesGlyphs[graphField.owner(px,py)]:fieldGlyphs,shades=set,edgeColor=set[3];
-      const edge=!mask[i-1]||!mask[i+1]||!mask[i-cols]||!mask[i+cols]||!mask[i-cols-1]||!mask[i+cols+1];
+      const set=seriesGlyphs?seriesGlyphs[graphField.owner(px,py)]:fieldGlyphs,edgeColor=set[3];
+      // Graphs outline only the curve and upper sides; the base fades out through an ordered dither.
+      const density=graphField?graphField.density(px,py):1;
+      const edge=graphField?!mask[i-cols]||(density>.55&&(!mask[i-1]||!mask[i+1]||!mask[i-cols-1]||!mask[i-cols+1])):!mask[i-1]||!mask[i+1]||!mask[i-cols]||!mask[i+cols]||!mask[i-cols-1]||!mask[i+cols+1];
+      if(graphField&&!edge&&Math.pow(density,.7)<=GlyphGraph.bayer(x,y))continue;
+      const fade=graphField?.45+.55*Math.round(density*4)/4:1,shades=fade<1?set.map(c=>shade(c,fade)):set;
       const texture=noise(px/short*(circular?freq:4)+15,py/short*(circular?freq:4)+27)+(shape&&s.shapeFill==='solid'?organicField(px,py)*.7:0);
       if(edge){
         edges.push([px,py]);
@@ -218,7 +222,7 @@
     // Oversized, repeated letter fragments make the occasional typographic glitch.
     const letters='ssttrreewwxxllkkaaoohh',cutouts=[],accentGlyphs=[];
     let transparentDefs='';
-    for(let n=0;n<Math.round((graph?s.graphStars:s.accent)*.68);n++){
+    for(let n=0;n<(graph?0:Math.round(s.accent*.68));n++){
       if(!edges.length)break;
       const [x,y]=edges[Math.floor(rnd()*edges.length)],size=step*(1.8+rnd()*.6),ch=letters[Math.floor(rnd()*letters.length)];
       const vertical=rnd()>.55,length=2+Math.floor(rnd()*4);
@@ -271,10 +275,8 @@
     if(dial){syncingDials=true;try{dial.setValues(Object.fromEntries(CONTROL_SPECS.map(c=>[c.path,state[c.key]])));}finally{syncingDials=false;}}
     const graph=state.mode==='graph';
     $('field-controls').hidden=graph;$('graph-controls').hidden=!graph;$('graph-colors').hidden=!graph;$('glyph-picker').hidden=graph;
-    const glyphGraph=graph&&state.graphStyle==='glyph';$('palette').hidden=graph&&!glyphGraph;$('graph-pixel-only').hidden=state.graphStyle!=='pixel';
-    $('graph-pixel-name').textContent=state.graphStyle==='pixel'?'Pixel size':'Glyph size';$('graph-stars-name').textContent=state.graphStyle==='pixel'?'Sparkle':'Marks';
-    $('accent-color').dataset.label=glyphGraph?'Letter':'Accent';
-    document.querySelectorAll('.mode-tab').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===state.mode)));
+    $('palette').hidden=graph;$('graph-pixel-only').hidden=state.graphStyle!=='pixel';
+    $('graph-pixel-name').textContent=state.graphStyle==='pixel'?'Pixel size':'Glyph size';$('graph-stars-name').textContent=state.graphStyle==='pixel'?'Sparkle':'Marks';    document.querySelectorAll('.mode-tab').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===state.mode)));
     for(const [id,key] of GRAPH_CONTROLS){$('graph-'+id).value=state[key];$('graph-'+id+'-value').textContent=state[key];}
     for(const [id,key] of GRAPH_SELECTS)$(id).value=state[key];
     SERIES.forEach((key,i)=>{$(key+'-color').value=state[key];$(key+'-picker').hidden=i>=state.graphSeries;});
@@ -304,7 +306,7 @@
   // Hidden settings from the other mode must not split otherwise identical history entries.
   function key(s){
     const {resolution,...visual}=s;
-    const keep=s.mode==='graph'?k=>graphOnly(k)||['mode','seed','ratio','background','transparent','color'].includes(k):k=>!graphOnly(k);
+    const keep=s.mode==='graph'?k=>graphOnly(k)||['mode','seed','ratio','background','transparent'].includes(k):k=>!graphOnly(k);
     return JSON.stringify(Object.fromEntries(Object.entries(visual).filter(([k])=>keep(k))));
   }
   function paintRange(el){el.style.setProperty('--fill',((el.value-el.min)/(el.max-el.min)*100)+'%');}
