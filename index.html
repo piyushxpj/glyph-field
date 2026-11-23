@@ -7,7 +7,7 @@
   <title>Glyph Field — ASCII image studio</title>
   <link rel="stylesheet" href="vendor/dialkit.css">
   <link rel="stylesheet" href="vendor/ui.css">
-  <link rel="stylesheet" href="style.css?v=studio-5">
+  <link rel="stylesheet" href="style.css?v=studio-14">
 </head>
 <body>
   <header class="topbar">
@@ -20,14 +20,9 @@
     <select id="export-format" hidden aria-hidden="true" tabindex="-1"><option value="png">PNG</option><option value="svg">SVG</option></select>
   </header>
   <main>
-    <aside class="library" aria-label="Recent compositions">
-      <div class="panel-heading"><h2>Library</h2><span id="history-count">01</span></div>
-      <p class="library-note">Recent compositions. Select to restore.</p>
-      <div id="history" class="history"></div>
-    </aside>
     <section class="workspace" aria-label="Image preview">
       <div class="preview-top"><div><span id="art-title">MYCELIUM</span><span class="slash">/</span><span class="seed-prefix">Seed</span><span id="seed-display">781204</span></div><span id="dimensions">1638 × 2048</span></div>
-      <div class="art-stage"><div id="transparency-grid" aria-hidden="true"></div><canvas id="art" width="800" height="1000" role="img" aria-label="Generated organic ASCII artwork with white and gray glyphs on charcoal"></canvas></div>
+      <div class="art-stage"><div id="transparency-grid" aria-hidden="true"></div><img id="trace-overlay" class="trace-overlay" alt="" aria-hidden="true" hidden><canvas id="art" width="800" height="1000" role="img" aria-label="Generated organic ASCII artwork with white and gray glyphs on charcoal"></canvas></div>
       <div id="toolbar" class="dock"></div>
       <div class="preview-bottom"><span class="preview-label"><i aria-hidden="true"></i>Live preview</span><span id="render-status" role="status" aria-live="polite">Ready</span></div>
     </section>
@@ -50,6 +45,21 @@
           <button class="form" data-form="cluster" aria-pressed="false" title="Scattered fragments"><span class="form-icon" data-icon="Sparkles"></span><span class="form-name">Colony</span><span class="form-desc">Scattered fragments</span></button>
         </div>
         <p id="structure-description" class="structure-description">Branching networks</p>
+      </section>
+      <section id="trace-controls" aria-label="Rebuild an image as glyphs">
+        <div class="section-heading"><h2>From image</h2><span>Image → SVG</span></div>
+        <input id="trace-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        <div id="trace-loaded" class="trace-loaded" hidden><img id="trace-thumb" alt=""><div><strong id="trace-name"></strong><small id="trace-meta"></small></div></div>
+        <div class="trace-actions"><button type="button" id="trace-upload" class="trace-button">Upload image</button><button type="button" id="trace-use" class="trace-button" hidden>Show traced image</button></div>
+        <div id="trace-settings" hidden>
+          <label class="circle-range-label" for="trace-step">Glyph size <output id="trace-step-value">9</output></label><input class="circle-range" id="trace-step" type="range" min="4" max="32" step="1" value="9">
+          <label class="circle-range-label" for="trace-threshold">Threshold <output id="trace-threshold-value">14</output></label><input class="circle-range" id="trace-threshold" type="range" min="2" max="60" step="1" value="14">
+          <label class="circle-range-label" for="trace-smooth">Smoothing <output id="trace-smooth-value">95</output></label><input class="circle-range" id="trace-smooth" type="range" min="30" max="200" step="1" value="95">
+          <label class="circle-range-label" for="trace-edge">Edge size <output id="trace-edge-value">100</output></label><input class="circle-range" id="trace-edge" type="range" min="40" max="160" step="1" value="100">
+          <div class="trace-actions trace-secondary"><button type="button" id="trace-compare" class="trace-button" aria-pressed="false">Compare with original</button><button type="button" id="trace-colors" class="trace-button">Use detected colors</button></div>
+          <p class="structure-description">Threshold grows or shrinks the shapes; Smoothing loosens or tightens the outline. Form scale changes the fill texture, Letter marks the accent letters, and Shuffle reshuffles both. Colors, Frame, and transparency all apply.</p>
+        </div>
+        <p class="structure-description">Upload or drop a PNG made with Glyph Field. It's rebuilt as editable glyphs you can export as SVG. Glyph size is detected; adjust it if the grid looks off. The result matches the shapes and colors, not every glyph.</p>
       </section>
       <section id="circle-controls" class="shape-section" aria-label="Circle pattern" hidden>
         <div class="section-heading"><h2>Circle pattern</h2><span>Repeated motifs</span></div>
@@ -140,9 +150,10 @@
   </main>
   <script src="vendor/dialkit.js"></script>
   <script src="vendor/motion.js"></script>
-  <script src="vendor/ui.js?v=studio-5"></script>
+  <script src="vendor/ui.js?v=studio-14"></script>
   <script src="shapes.js"></script>
-  <script src="graph.js?v=studio-7"></script>
-  <script src="app.js?v=studio-8"></script>
+  <script src="graph.js?v=studio-14"></script>
+  <script src="trace.js?v=studio-18"></script>
+  <script src="app.js?v=studio-14"></script>
 </body>
 </html>

@@ -23,7 +23,7 @@ Then open http://localhost:4187. To change the React UI or rebuild bundles, see 
 
 ## Layout
 
-The studio has three columns: **Library** (recent compositions) on the left, the canvas in the middle, and the inspector on the right with **Pattern**, **Colors**, and **Canvas** tabs. Under the canvas, a dock holds **Shuffle**, the export format, and **Export**. On narrower screens the Library moves under the canvas; on phones the order is canvas, Library, then controls.
+The canvas sits on the left and the inspector on the right, with **Pattern**, **Colors**, and **Canvas** tabs. Under the canvas, a dock holds **Shuffle**, the export format, and **Export**. On phones the controls stack below the canvas.
 
 ## Field mode
 
@@ -32,25 +32,25 @@ The studio has three columns: **Library** (recent compositions) on the left, the
 - **Spiral** creates dotted winding trails inspired by a scattered, two-tone reference. Adjust turns, arms, scatter, dot size, dot density, accent mix, and direction. **Use reference palette** applies lavender dots, pink accents, and a light gray background; all three colors remain editable. The glyph picker becomes **Dot color** in this mode. Transparent PNG and editable-circle SVG exports preserve the same composition.
 - **Circles** builds a pattern from repeated circular motifs. Choose **Symmetric grid**, **Staggered rows**, **Radial symmetry**, or **Asymmetric scatter**. Choose rings, filled circles, or concentric rings, then adjust **Circle size** and **Spacing**. Coverage adjusts ring weight. New composition varies glyph texture; scatter also varies circle positions and sizes. All settings persist and work with PNG/SVG and transparency.
 - In **Frame**, choose Circle, Rounded box, Square, Diamond, Hexagon, Triangle, or Ring. **Freeform** keeps the original edge-to-edge compositions. Shapes stay proportional in every canvas ratio. This optional crop applies to the original organic structures; Circles uses its own repeated layout.
-- Choose **Organic pattern** to contain the existing form inside the silhouette, or **Full glyph fill** for a continuous textured shape. Shape and fill persist in history and settings and apply to both PNG and SVG, including transparent exports. Structure and texture controls vary the interior; the silhouette stays fixed.
+- Choose **Organic pattern** to contain the existing form inside the silhouette, or **Full glyph fill** for a continuous textured shape. Shape and fill persist in settings and apply to both PNG and SVG, including transparent exports. Structure and texture controls vary the interior; the silhouette stays fixed.
+- **From image** rebuilds a PNG, JPG, or WebP made with Glyph Field as a new, editable composition, so older exports can become SVGs. Upload it or drop it on the canvas. The studio detects the background, glyph, and accent colors and the glyph size, then traces the shapes. Tune **Glyph size**, **Threshold** (grow or shrink shapes), **Smoothing** (outline tightness), and **Edge size**; **Compare with original** overlays your image at half opacity. Form scale, Letter marks, Shuffle, Frame, colors, and transparency all apply. The result matches the shapes and colors, not every glyph, because a PNG doesn't store the seed or settings. The image stays in memory only and is never uploaded anywhere.
 - Click **Shuffle** or press **Space** outside a control for a fresh composition. This works in both modes.
 - Adjust form scale, coverage, glyph size, and letter-mark quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.
 - Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn preview motion off. Motion feedback honors the system reduced-motion preference. Artwork accent controls remain beneath the texture controls.
 - Set **Background color** and **Glyph color** independently in the Colors section. Both offer the same color wheel, brightness controls, and hex entry. Glyphs retain subtle tonal variation for texture. **Reset colors** resets the whole palette; **Reset texture** leaves colors alone.
-- Choose Monochrome, Violet, Sage, Ember, or Ice for the artwork accent. The **+** button opens a custom color wheel with hue, saturation, brightness, and six-digit hex entry. Arrow keys also operate the wheel and sliders. All three colors persist in settings and history and are included in PNG/SVG exports. Older saved compositions receive the original background and glyph defaults.
-- Enable **Transparent background** in Colors for PNG and SVG with real alpha transparency. The preview and recent thumbnails show a checkerboard, which is never exported. Your background color is preserved while its picker is disabled; turn transparency off to restore it. Transparency is saved with settings/history, and **Reset colors** turns it off.
+- Choose Monochrome, Violet, Sage, Ember, or Ice for the artwork accent. The **+** button opens a custom color wheel with hue, saturation, brightness, and six-digit hex entry. Arrow keys also operate the wheel and sliders. All three colors persist in settings and are included in PNG/SVG exports. Older saved compositions receive the original background and glyph defaults.
+- Enable **Transparent background** in Colors for PNG and SVG with real alpha transparency. The preview shows a checkerboard, which is never exported. Your background color is preserved while its picker is disabled; turn transparency off to restore it. Transparency is saved with settings, and **Reset colors** turns it off.
 - Transparent exports omit the background, full-surface grain, and vignette so empty areas remain completely clear. Accent letters cut through the glyph field without opaque backplates. Filenames include `-transparent`.
 - The interface branding stays black and white; artwork colors are independent.
 - Pick portrait, square, landscape, or story format.
 - Choose **PNG** or **SVG** beside **Export** in the toolbar. The format choice is remembered.
 - PNG exports have a 2048 px or 4096 px longest edge. SVG uses that nominal size with a scalable viewBox, editable text, vector marks, a vector grain pattern, and a gradient vignette. It contains no embedded bitmap.
 - SVG glyphs remain text rather than outlined paths, so font appearance can vary across editors and operating systems. Composition settings are included in SVG metadata.
-- Revisit up to eight recent compositions. Settings and history persist locally when browser storage is available.
 - Enter a seed to repeat a composition. Exact reproduction requires the same seed and all the same controls. Font rendering can vary between browsers and operating systems.
 
 ## Graph mode
 
-Switch to **Graph** at the top left. Graphs share the seed, canvas ratio, export, transparency, and history with Field mode. Landscape 16:9 suits them best; on portrait canvases the chart height is capped so it still reads as a strip.
+Switch to **Graph** at the top left. Graphs share the seed, canvas ratio, export, and transparency with Field mode. Landscape 16:9 suits them best; on portrait canvases the chart height is capped so it still reads as a strip.
 
 **Profile**
 
@@ -95,8 +95,9 @@ The renderer creates seeded, domain-warped noise fields, classifies foreground c
 - `index.html` — accessible studio controls and preview
 - `style.css` — responsive layout
 - `shapes.js` — shared geometry for canvas clipping and scalable SVG paths
+- `trace.js` — reads an uploaded image back into a field: background and accent detection, glyph-size estimate, and a coverage mask
 - `graph.js` — graph curves, series layout, the pixel-dither renderer, and the mask that feeds glyph-style graphs into the field renderer
-- `app.js` — seeded renderer, export, local history, DialKit binding, and Motion feedback
+- `app.js` — seeded renderer, export, saved settings, DialKit binding, and Motion feedback
 - `vendor/` — local DialKit 2.2.0 and Motion 14.12.0 browser bundles, styles, and licenses
 - `src/` — shadcn components, React control adapters, color picker, and color conversions
 - `scripts/build-ui.mjs` — bundles the component UI and collects dependency license notices
@@ -111,7 +112,7 @@ The studio applies Stageshow’s framing and spacing guidance, with an Emil Kowa
 
 `npm install` installs the UI and build dependencies. Run `npm run build` to refresh the offline bundles and create the static `dist/` deployment, `npm run check` for JavaScript syntax and TypeScript checks, `npm test` for color math and wheel-boundary checks, and `npm start` to serve the app. The renderer remains plain JavaScript. Small React roots host shadcn Button, Select, Popover, and Slider components with Lucide icons; esbuild and Tailwind produce local browser bundles. The compiled app still opens directly from `index.html` without a build server or network connection.
 
-Generation, texture changes, and history restoration update immediately without fading the artwork. Pointer-driven structure selection uses an interruptible 180 ms highlight; keyboard actions remain instant. The export button keeps a fixed width through preparing and completed states. History buttons keep their DOM identity and keyboard focus. Motion settings persist alongside the composition. DialKit's version menu supports comparing parameter sets within the session; recent image compositions continue to persist in the app's own history.
+Generation and texture changes update immediately without fading the artwork. Pointer-driven structure selection uses an interruptible 180 ms highlight; keyboard actions remain instant. The export button keeps a fixed width through preparing and completed states. Motion settings persist alongside the composition. DialKit's version menu supports comparing parameter sets within the session.
 
 ## Vercel deployment
 
