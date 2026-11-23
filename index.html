@@ -7,7 +7,7 @@
   <title>Glyph Field — ASCII image studio</title>
   <link rel="stylesheet" href="vendor/dialkit.css">
   <link rel="stylesheet" href="vendor/ui.css">
-  <link rel="stylesheet" href="style.css?v=studio-14">
+  <link rel="stylesheet" href="style.css?v=studio-21">
 </head>
 <body>
   <header class="topbar">
@@ -29,7 +29,7 @@
     <aside class="controls" aria-label="Artwork controls">
       <div id="inspector"><div data-inspector-panel="pattern">
       <div id="field-controls">
-      <section><div class="section-heading"><h2>Structure</h2><span>11 forms</span></div>
+      <section><div class="section-heading"><h2>Structure</h2><span>10 forms</span></div>
         <div class="forms" role="group" aria-label="Structure">
           <button class="form selected" data-form="mycelium" aria-pressed="true" title="Branching networks"><span class="form-icon" data-icon="GitBranch"></span><span class="form-name">Mycelium</span><span class="form-desc">Branching networks</span></button>
           <button class="form" data-form="islands" aria-pressed="false" title="Scattered landforms"><span class="form-icon" data-icon="CircleDot"></span><span class="form-name">Archipelago</span><span class="form-desc">Scattered landforms</span></button>
@@ -37,7 +37,6 @@
           <button class="form" data-form="contours" aria-pressed="false" title="Nested elevations"><span class="form-icon" data-icon="Layers"></span><span class="form-name">Contours</span><span class="form-desc">Nested elevations</span></button>
           <button class="form" data-form="cells" aria-pressed="false" title="Organic membranes"><span class="form-icon" data-icon="Hexagon"></span><span class="form-name">Cellular</span><span class="form-desc">Organic membranes</span></button>
           <button class="form" data-form="circles" aria-pressed="false" title="Repeating circular motifs"><span class="form-icon" data-icon="CircleDot"></span><span class="form-name">Circles</span><span class="form-desc">Repeating circular motifs</span></button>
-          <button class="form" data-form="spiral" aria-pressed="false" title="Scattered dotted spirals"><span class="form-icon" data-icon="Orbit"></span><span class="form-name">Spiral</span><span class="form-desc">Scattered dotted spirals</span></button>
           <span class="form-group-label">Isolated</span>
           <button class="form" data-form="blob" aria-pressed="false" title="Single organic form"><span class="form-icon" data-icon="Fingerprint"></span><span class="form-name">Organism</span><span class="form-desc">Single organic form</span></button>
           <button class="form" data-form="wave" aria-pressed="false" title="Flowing ribbon"><span class="form-icon" data-icon="Wind"></span><span class="form-name">Drift</span><span class="form-desc">Flowing ribbon</span></button>
@@ -68,18 +67,6 @@
         <label class="circle-range-label" for="circle-size">Circle size <output id="circle-size-value">60</output></label><input class="circle-range" id="circle-size" type="range" min="20" max="100" value="60">
         <label class="circle-range-label" for="circle-spacing">Spacing <output id="circle-spacing-value">28</output></label><input class="circle-range" id="circle-spacing" type="range" min="0" max="80" value="28">
         <p class="structure-description">New composition varies the texture. Scatter also varies circle positions and sizes.</p>
-      </section>
-      <section id="spiral-controls" class="shape-section" aria-label="Spiral pattern" hidden>
-        <div class="section-heading"><h2>Spiral pattern</h2><span>Dotted trails</span></div>
-        <div class="control-row"><span class="field-label">Direction</span><select id="spiral-direction" hidden aria-hidden="true" tabindex="-1"><option value="clockwise">Clockwise</option><option value="counterclockwise">Counterclockwise</option></select><div id="spiral-direction-select"></div></div>
-        <label class="circle-range-label" for="spiral-turns">Turns <output id="spiral-turns-value">3.5</output></label><input class="circle-range" id="spiral-turns" type="range" min="1" max="7" step="0.5" value="3.5">
-        <label class="circle-range-label" for="spiral-arms">Arms <output id="spiral-arms-value">2</output></label><input class="circle-range" id="spiral-arms" type="range" min="1" max="5" step="1" value="2">
-        <label class="circle-range-label" for="spiral-scatter">Scatter <output id="spiral-scatter-value">55</output></label><input class="circle-range" id="spiral-scatter" type="range" min="0" max="100" step="1" value="55">
-        <label class="circle-range-label" for="spiral-dot-size">Dot size <output id="spiral-dot-size-value">8</output></label><input class="circle-range" id="spiral-dot-size" type="range" min="2" max="14" step="1" value="8">
-        <label class="circle-range-label" for="spiral-density">Dot density <output id="spiral-density-value">75</output></label><input class="circle-range" id="spiral-density" type="range" min="20" max="100" step="1" value="75">
-        <label class="circle-range-label" for="spiral-accent">Accent mix <output id="spiral-accent-value">35</output></label><input class="circle-range" id="spiral-accent" type="range" min="0" max="100" step="1" value="35">
-        <div id="spiral-palette-control"></div>
-        <p class="structure-description">Use the reference’s lavender and pink palette, or choose your own in Colors.</p>
       </section>
       <section id="shape-controls" class="shape-section" aria-label="Artwork shape">
         <div class="section-heading"><h2>Frame</h2><span>Optional crop</span></div>
@@ -150,10 +137,10 @@
   </main>
   <script src="vendor/dialkit.js"></script>
   <script src="vendor/motion.js"></script>
-  <script src="vendor/ui.js?v=studio-14"></script>
+  <script src="vendor/ui.js?v=studio-20"></script>
   <script src="shapes.js"></script>
-  <script src="graph.js?v=studio-14"></script>
-  <script src="trace.js?v=studio-18"></script>
-  <script src="app.js?v=studio-14"></script>
+  <script src="graph.js?v=studio-20"></script>
+  <script src="trace.js?v=studio-20"></script>
+  <script src="app.js?v=studio-20"></script>
 </body>
 </html>

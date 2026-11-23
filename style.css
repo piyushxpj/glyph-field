@@ -91,7 +91,6 @@ section { min-width: 0; }
 
 .forms { position: relative; isolation: isolate; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .form { position: relative; z-index: 1; min-height: 38px; display: flex; align-items: center; gap: 9px; text-align: left; color: #b8b8b8; background: transparent; border: 1px solid var(--line); border-radius: 0; padding: 8px 10px; }
-.form[data-form="spiral"] { grid-column: 1 / -1; }
 .form-icon { display: inline-flex; width: 18px; height: 18px; flex: none; opacity: .65; }
 .form-name { font-size: 12px; line-height: 1.35; }
 .form-desc { display: none; }
@@ -125,7 +124,6 @@ section { min-width: 0; }
 .circle-range:disabled { opacity: .35; cursor: not-allowed; }
 .texture-reset { display: inline-flex; align-items: center; gap: 7px; margin: 14px 0 0 -8px; padding: 0 8px; height: 30px; font: 11px var(--mono); color: var(--muted); border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .texture-reset svg { width: 13px; height: 13px; }
-.reference-palette { margin-top: 18px; width: 100%; min-height: 36px; border-radius: 0; border-color: var(--line-strong); background: transparent; }
 
 /* DialKit inherits the inspector's surfaces. */
 #dial-panel { margin: -6px -4px 6px; }
@@ -150,9 +148,9 @@ section { min-width: 0; }
 .accent-control { margin: 18px 0 10px; }
 .accent-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #c4c4c4; }
 .color-code { font: 11px var(--mono); color: var(--muted); }
-.color-presets { display: flex; align-items: center; justify-content: space-between; gap: 3px; margin-top: 10px; }
+.color-presets { display: flex; align-items: center; justify-content: flex-start; gap: 4px; margin-top: 10px; }
 .color-swatch { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 1px solid transparent; border-radius: 0; background: transparent; }
-.color-swatch > span { width: 18px; height: 18px; display: grid; place-items: center; color: #111; box-shadow: inset 0 0 0 1px #fff2; }
+.color-swatch > span { width: 22px; height: 22px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px #ffffff38; }
 .color-swatch[aria-pressed="true"] { border-color: #8a8a8a; }
 .custom-color { width: 32px; height: 32px; background: var(--surface); color: #d4d4d4; border: 1px solid var(--line-strong); border-radius: 0; box-shadow: none; }
 .custom-color[data-selected="true"] { border-color: #a3a3a3; }
@@ -280,3 +278,12 @@ html[data-input="keyboard"] *, html[data-input="keyboard"] *::before, html[data-
 .trace-secondary { margin-top: 16px; }
 .trace-overlay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; opacity: .5; pointer-events: none; }
 .trace-button[aria-pressed="true"] { border-color: #a3a3a3; background: #1a1a1a; }
+
+/* Copy SVG */
+.dock .copy-svg { position: relative; overflow: hidden; width: 128px; height: 100%; padding: 0; border: 0; border-right: 1px solid var(--line-strong); border-radius: 0; background: transparent; color: var(--ink); font-size: 14px; font-weight: 400; box-shadow: none; }
+.copy-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 9px; pointer-events: none; transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out); }
+.copy-done { opacity: 0; transform: translateY(5px); }
+.copy-svg[data-state="done"] .copy-idle { opacity: 0; transform: translateY(-5px); }
+.copy-svg[data-state="done"] .copy-done { opacity: 1; transform: none; }
+@media (hover: hover) and (pointer: fine) { .dock .copy-svg:hover { background: #151515; } }
+@media (max-width: 700px) { .dock .copy-svg { width: 52px; flex: none; } .copy-label { display: none; } }

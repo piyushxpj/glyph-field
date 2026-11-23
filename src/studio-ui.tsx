@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import { Tabs } from 'radix-ui';
-import { Shuffle, Download, Check, RotateCcw, CornerDownLeft, GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit, Fingerprint, Wind, Sprout, Sparkles } from 'lucide-react';
+import { Shuffle, Download, Check, RotateCcw, CornerDownLeft, GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Fingerprint, Wind, Sprout, Sparkles, Copy } from 'lucide-react';
 import { ColorPicker } from './color-picker';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -39,6 +39,10 @@ function TransparencyControl() {
 function Toolbar() {
   return <>
     <Button id="generate" variant="ghost" className="generate" aria-label="New composition"><Shuffle aria-hidden="true"/>Shuffle<kbd>Space</kbd></Button>
+    <Button id="copy-svg" variant="ghost" className="copy-svg" data-state="idle" aria-label="Copy as SVG" title="Copy as SVG">
+      <span className="copy-face copy-idle" aria-hidden="true"><Copy/><span className="copy-label">Copy SVG</span></span>
+      <span className="copy-face copy-done" aria-hidden="true"><Check/><span className="copy-label">Copied</span></span>
+    </Button>
     <div className="export-controls">
       <StudioSelect target="export-format" label="Export format" className="format-select" />
       <Button id="download" className="export" data-state="idle" aria-label="Export artwork">
@@ -81,15 +85,13 @@ mount('reset-graph-control', <Button id="reset-graph" variant="ghost" size="sm" 
 mount('reset-colors-control', <Button id="reset-colors" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset colors</Button>);
 mount('circle-layout-select', <StudioSelect target="circle-layout" label="Circle arrangement"/>);
 mount('circle-style-select', <StudioSelect target="circle-style" label="Circle motif"/>);
-mount('spiral-direction-select', <StudioSelect target="spiral-direction" label="Spiral direction"/>);
-mount('spiral-palette-control', <Button id="spiral-palette" variant="outline" size="sm" className="reference-palette">Use reference palette</Button>);
 mount('shape-select', <StudioSelect target="shape" label="Artwork shape"/>);
 mount('shape-fill-select', <StudioSelect target="shape-fill" label="Shape fill"/>);
 mount('ratio-select', <StudioSelect target="ratio" label="Canvas ratio"/>);
 mount('resolution-select', <StudioSelect target="resolution" label="Export size"/>);
 mount('reset-control', <Button id="reset" variant="ghost" size="sm" className="texture-reset"><RotateCcw aria-hidden="true"/>Reset texture</Button>);
 mount('seed-apply', <Button id="apply-seed" variant="ghost" size="icon" aria-label="Apply seed"><CornerDownLeft aria-hidden="true"/></Button>);
-const icons = { GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Orbit, Fingerprint, Wind, Sprout, Sparkles };
+const icons = { GitBranch, Waves, Layers, CircleDot, Hexagon, Scan, ArrowUpRight, Fingerprint, Wind, Sprout, Sparkles };
 for (const element of document.querySelectorAll<HTMLElement>('[data-icon]')) {
   const Icon = icons[element.dataset.icon as keyof typeof icons];
   if (Icon) flushSync(() => createRoot(element).render(<Icon aria-hidden="true" size={18} strokeWidth={1.5}/>));

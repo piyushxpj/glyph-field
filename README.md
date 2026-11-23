@@ -23,13 +23,12 @@ Then open http://localhost:4187. To change the React UI or rebuild bundles, see 
 
 ## Layout
 
-The canvas sits on the left and the inspector on the right, with **Pattern**, **Colors**, and **Canvas** tabs. Under the canvas, a dock holds **Shuffle**, the export format, and **Export**. On phones the controls stack below the canvas.
+The canvas sits on the left and the inspector on the right, with **Pattern**, **Colors**, and **Canvas** tabs. Under the canvas, a dock holds **Shuffle**, **Copy SVG**, the export format, and **Export**. On phones the controls stack below the canvas.
 
 ## Field mode
 
-- Choose Mycelium, Archipelago, Currents, Contours, Cellular, **Circles**, or **Spiral** for patterns that fill the canvas.
+- Choose Mycelium, Archipelago, Currents, Contours, Cellular, or **Circles** for patterns that fill the canvas.
 - Under **Isolated**, choose a single floating shape with negative space around it: **Organism** (one organic blob), **Drift** (a flowing ribbon with tapered ends), **Filament** (branching networks confined to an organic region), or **Colony** (scattered small fragments). Shuffle produces a new variation of the same shape type. Density sets the shape's size or thickness, and all texture and color controls still apply.
-- **Spiral** creates dotted winding trails inspired by a scattered, two-tone reference. Adjust turns, arms, scatter, dot size, dot density, accent mix, and direction. **Use reference palette** applies lavender dots, pink accents, and a light gray background; all three colors remain editable. The glyph picker becomes **Dot color** in this mode. Transparent PNG and editable-circle SVG exports preserve the same composition.
 - **Circles** builds a pattern from repeated circular motifs. Choose **Symmetric grid**, **Staggered rows**, **Radial symmetry**, or **Asymmetric scatter**. Choose rings, filled circles, or concentric rings, then adjust **Circle size** and **Spacing**. Coverage adjusts ring weight. New composition varies glyph texture; scatter also varies circle positions and sizes. All settings persist and work with PNG/SVG and transparency.
 - In **Frame**, choose Circle, Rounded box, Square, Diamond, Hexagon, Triangle, or Ring. **Freeform** keeps the original edge-to-edge compositions. Shapes stay proportional in every canvas ratio. This optional crop applies to the original organic structures; Circles uses its own repeated layout.
 - Choose **Organic pattern** to contain the existing form inside the silhouette, or **Full glyph fill** for a continuous textured shape. Shape and fill persist in settings and apply to both PNG and SVG, including transparent exports. Structure and texture controls vary the interior; the silhouette stays fixed.
@@ -37,13 +36,14 @@ The canvas sits on the left and the inspector on the right, with **Pattern**, **
 - Click **Shuffle** or press **Space** outside a control for a fresh composition. This works in both modes.
 - Adjust form scale, coverage, glyph size, and letter-mark quantity with the embedded DialKit controls. Arrow keys adjust a focused slider; Enter opens numeric entry.
 - Open **Preview Motion** to tune a time-based spring, physics spring, or easing curve, replay the preview, or turn preview motion off. Motion feedback honors the system reduced-motion preference. Artwork accent controls remain beneath the texture controls.
-- Set **Background color** and **Glyph color** independently in the Colors section. Both offer the same color wheel, brightness controls, and hex entry. Glyphs retain subtle tonal variation for texture. **Reset colors** resets the whole palette; **Reset texture** leaves colors alone.
-- Choose Monochrome, Violet, Sage, Ember, or Ice for the artwork accent. The **+** button opens a custom color wheel with hue, saturation, brightness, and six-digit hex entry. Arrow keys also operate the wheel and sliders. All three colors persist in settings and are included in PNG/SVG exports. Older saved compositions receive the original background and glyph defaults.
+- Set **Background color** and **Glyph color** independently in the Colors section. Glyphs retain subtle tonal variation for texture. **Reset colors** resets the whole palette; **Reset texture** leaves colors alone.
+- Background, Glyph, and Accent each offer preset swatches plus a **+** button for any other color. Background: Aubergine `#201527`, Forest `#062916`, Midnight `#000011`, Burnt Ochre `#9A581F`. Glyph: Lilac `#B182C2`, Leaf `#65CC5C`, Copper `#C0752F`, Moss `#1D8414`, Silver `#ADADAD`. Accent: White `#FFFFFF`, Electric Violet `#8320C5`, Botanical Green `#3CA42C`, Burnt Ochre `#9A581F`. Presets apply their exact hex. The **+** button opens a custom color wheel with hue, saturation, brightness, and six-digit hex entry. Arrow keys also operate the wheel and sliders. All three colors persist in settings and are included in PNG/SVG exports. Older saved compositions receive the original background and glyph defaults.
 - Enable **Transparent background** in Colors for PNG and SVG with real alpha transparency. The preview shows a checkerboard, which is never exported. Your background color is preserved while its picker is disabled; turn transparency off to restore it. Transparency is saved with settings, and **Reset colors** turns it off.
 - Transparent exports omit the background, full-surface grain, and vignette so empty areas remain completely clear. Accent letters cut through the glyph field without opaque backplates. Filenames include `-transparent`.
 - The interface branding stays black and white; artwork colors are independent.
 - Pick portrait, square, landscape, or story format.
 - Choose **PNG** or **SVG** beside **Export** in the toolbar. The format choice is remembered.
+- **Copy SVG** in the dock puts the current composition on the clipboard as SVG markup, ready to paste into Figma, a code editor, or anywhere that accepts SVG. It uses the same output as an SVG export at your chosen export size.
 - PNG exports have a 2048 px or 4096 px longest edge. SVG uses that nominal size with a scalable viewBox, editable text, vector marks, a vector grain pattern, and a gradient vignette. It contains no embedded bitmap.
 - SVG glyphs remain text rather than outlined paths, so font appearance can vary across editors and operating systems. Composition settings are included in SVG metadata.
 - Enter a seed to repeat a composition. Exact reproduction requires the same seed and all the same controls. Font rendering can vary between browsers and operating systems.

@@ -2,12 +2,12 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular',circles:'Circles',spiral:'Spiral',blob:'Organism',wave:'Drift',tendril:'Filament',cluster:'Colony',trace:'Traced image'};
-  const descriptions={trace:'Rebuilt from your uploaded image',mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes',circles:'Repeating circular motifs',spiral:'Scattered dotted spirals',blob:'Single organic form',wave:'Flowing ribbon',tendril:'Confined branches',cluster:'Scattered fragments'};
-  const {names:shapeNames,geometry:shapeGeometry,arrangements,circlePattern,spiralPoints}=GlyphShapes;
+  const names = {mycelium:'Mycelium',islands:'Archipelago',ribbons:'Currents',contours:'Contours',cells:'Cellular',circles:'Circles',blob:'Organism',wave:'Drift',tendril:'Filament',cluster:'Colony',trace:'Traced image'};
+  const descriptions={trace:'Rebuilt from your uploaded image',mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes',circles:'Repeating circular motifs',blob:'Single organic form',wave:'Flowing ribbon',tendril:'Confined branches',cluster:'Scattered fragments'};
+  const {names:shapeNames,geometry:shapeGeometry,arrangements,circlePattern}=GlyphShapes;
   const {profileNames,palettes:graphPalettes,draw:drawGraph}=GlyphGraph;
-  const compositionName=s=>s.mode==='graph'?`Graph · ${profileNames[s.graphProfile]}`:s.form==='spiral'?'Spiral':s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
-  const defaults = {form:'mycelium',spiralTurns:3.5,spiralArms:2,spiralScatter:55,spiralDotSize:8,spiralDensity:75,spiralAccent:35,spiralDirection:'clockwise',circleLayout:'grid',circleStyle:'rings',circleSize:60,circleSpacing:28,shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048,
+  const compositionName=s=>s.mode==='graph'?`Graph · ${profileNames[s.graphProfile]}`:s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
+  const defaults = {form:'mycelium',circleLayout:'grid',circleStyle:'rings',circleSize:60,circleSpacing:28,shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048,
     mode:'field',graphStyle:'glyph',graphProfile:'peaks',graphLayout:'row',graphDither:'bayer',graphCell:'gapped',graphEdge:'glow',graphSeries:1,graphGap:30,graphHeight:55,graphRough:30,graphPixel:6,graphFade:35,graphStars:30,
     series1:'#dbdbdb',series2:'#9c9c9c',series3:'#ededed',series4:'#7c7c7c',traceStep:9,traceThreshold:14,traceSmooth:95,traceEdge:100};
   const TRACE_CONTROLS=[['step','traceStep',4,32],['threshold','traceThreshold',2,60],['smooth','traceSmooth',30,200],['edge','traceEdge',40,160]];
@@ -18,7 +18,6 @@
   const GRAPH_CONTROLS=[['series','graphSeries',1,4],['gap','graphGap',0,80],['height','graphHeight',20,90],['rough','graphRough',0,100],['pixel','graphPixel',3,14],['fade','graphFade',0,100],['stars','graphStars',0,100]];
   const GRAPH_SELECTS=[['graph-style','graphStyle',['glyph','pixel']],['graph-profile','graphProfile',Object.keys(profileNames)],['graph-layout','graphLayout',['row','stack']],['graph-dither','graphDither',['bayer','scatter','halftone']],['graph-cell','graphCell',['square','gapped','dot']],['graph-edge','graphEdge',['glow','solid','none']]];
   const SERIES=[1,2,3,4].map(i=>'series'+i);
-  const SPIRAL_CONTROLS=[['turns','spiralTurns',1,7],['arms','spiralArms',1,5],['scatter','spiralScatter',0,100],['dot-size','spiralDotSize',2,14],['density','spiralDensity',20,100],['accent','spiralAccent',0,100]];
   let state = {...defaults}, revision = 0, exportFormat = 'png';
   const art = $('art');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -121,15 +120,6 @@
         else{ctx.beginPath();ctx.arc(x+r,y+r,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
       });
       if(vector)return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${lw} ${lh}" overflow="hidden" shape-rendering="crispEdges"><title>${escapeXML(compositionName(s)+' — '+s.seed)}</title><desc>Seeded pixel-dithered chart. Editable vector cells.</desc><metadata>${escapeXML(JSON.stringify(s))}</metadata>${parts.join('')}</svg>`;
-      return Math.round(performance.now()-start);
-    }
-    if(s.form==='spiral'&&!graph){
-      const points=spiralPoints(s,lw,lh,rnd);
-      for(const p of points){const color=p.accent?s.color:s.glyph;
-        if(vector)parts.push(`<circle cx="${number(p.x)}" cy="${number(p.y)}" r="${number(p.r)}" fill="${color}"/>`);
-        else{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
-      }
-      if(vector)return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${lw} ${lh}" overflow="hidden"><title>Spiral — ${escapeXML(s.seed)}</title><desc>Seeded dotted spiral trails. Editable vector circles.</desc><metadata>${escapeXML(JSON.stringify(s))}</metadata>${parts.join('')}</svg>`;
       return Math.round(performance.now()-start);
     }
     const shape=s.form==='circles'||graph?null:shapeGeometry(s.shape||'freeform',lw,lh);
@@ -288,16 +278,14 @@
     document.querySelectorAll('.graph-palette').forEach(b=>b.setAttribute('aria-pressed',String(graphPalettes[b.dataset.palette].colors.every((c,i)=>c===state[SERIES[i]]))));
     $('graph-multi').hidden=state.graphSeries===1;$('series1-color').dataset.label=state.graphSeries===1?'Graph':'Series 1';$('graph-gap').disabled=state.graphLayout==='stack';
     $('graph-series-note').textContent=state.graphSeries===1?'One graph, one color. Add more to compare side by side or layer them.':state.graphLayout==='stack'?'Graphs overlap on one baseline, back to front.':'Graphs sit next to each other, each in its own color.';
-    $('circle-controls').hidden=state.form!=='circles';$('shape-controls').hidden=['circles','spiral'].includes(state.form);$('spiral-controls').hidden=state.form!=='spiral';$('texture-controls').hidden=state.form==='spiral';
-    $('spiral-direction').value=state.spiralDirection;
-    for(const [id,key] of SPIRAL_CONTROLS){$('spiral-'+id).value=state[key];$('spiral-'+id+'-value').textContent=state[key];}
+    $('circle-controls').hidden=state.form!=='circles';$('shape-controls').hidden=state.form==='circles';
     $('circle-layout').value=state.circleLayout;$('circle-style').value=state.circleStyle;
     for(const [id,key] of [['circle-size','circleSize'],['circle-spacing','circleSpacing']]){$(id).value=state[key];$(id+'-value').textContent=state[key];}
     $('shape').value=state.shape;$('shape-fill').value=state.shapeFill;$('shape-fill-row').hidden=state.shape==='freeform';$('shape-description').textContent=state.shape==='freeform'?'Let the pattern extend to the canvas edges.':'A centered '+shapeNames[state.shape].toLowerCase()+', filled with glyphs.';
     $('seed').value=state.seed;$('ratio').value=state.ratio;$('resolution').value=state.resolution;
     document.querySelectorAll('.form').forEach(b=>{const on=b.dataset.form===state.form;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on);});
     positionSelection();
-    $('accent-color').value=state.color;$('background-color').value=state.background;$('glyph-color').value=state.glyph;$('glyph-color').dataset.label=state.form==='spiral'?'Dot':'Glyph';
+    $('accent-color').value=state.color;$('background-color').value=state.background;$('glyph-color').value=state.glyph;
     $('transparent-background').checked=state.transparent;$('background-color').disabled=state.transparent;
     art.parentElement.classList.toggle('is-transparent',state.transparent);
     $('structure-description').textContent=descriptions[state.form];
@@ -326,17 +314,15 @@
     if(tuneFrame){cancelAnimationFrame(tuneFrame);tuneFrame=0;}
     revision++;sync();const ms=render(art,state);fitChecker();$('render-status').textContent=`Rendered in ${ms} ms`;
     if(state.mode==='graph')art.setAttribute('aria-label',`${compositionName(state)}: ${state.graphStyle==='pixel'?'pixel-dithered':'ASCII glyph'} chart with ${state.graphSeries} series, seed ${state.seed}, on a ${state.transparent?'transparent':state.background} background.`);
-    else art.setAttribute('aria-label',`${compositionName(state)}: ${state.form==='spiral'?'dotted spiral':'ASCII'} artwork, seed ${state.seed}, with ${state.glyph} ${state.form==='spiral'?'dots':'glyphs'}, ${state.color} accents, and a ${state.transparent?'transparent':state.background} background.`);
+    else art.setAttribute('aria-label',`${compositionName(state)}: ASCII artwork, seed ${state.seed}, with ${state.glyph} glyphs, ${state.color} accents, and a ${state.transparent?'transparent':state.background} background.`);
     persist();
   }
   function generate(){const a=new Uint32Array(1);crypto.getRandomValues(a);state.seed=String(a[0]%1000000).padStart(6,'0');draw();}
   document.querySelectorAll('.form').forEach(b=>b.addEventListener('click',()=>{state.form=b.dataset.form;draw();}));
   for(const [id,key] of [['accent-color','color'],['background-color','background'],['glyph-color','glyph']])$(id).addEventListener('change',()=>{state[key]=$(id).value;draw();});
   $('transparent-background').addEventListener('change',()=>{state.transparent=$('transparent-background').checked;draw();});
-  for(const [id,key] of [['shape','shape'],['shape-fill','shapeFill'],['circle-layout','circleLayout'],['circle-style','circleStyle'],['spiral-direction','spiralDirection']])$(id).addEventListener('change',()=>{state[key]=$(id).value;draw();});
+  for(const [id,key] of [['shape','shape'],['shape-fill','shapeFill'],['circle-layout','circleLayout'],['circle-style','circleStyle']])$(id).addEventListener('change',()=>{state[key]=$(id).value;draw();});
   for(const [id,key] of [['circle-size','circleSize'],['circle-spacing','circleSpacing']])$(id).addEventListener('input',()=>{state[key]=Number($(id).value);draw();});
-  for(const [id,key] of SPIRAL_CONTROLS)$('spiral-'+id).addEventListener('input',()=>{state[key]=Number($('spiral-'+id).value);draw();});
-  $('spiral-palette').addEventListener('click',()=>{state.background='#c8c8cb';state.glyph='#7771ca';state.color='#df77da';draw();});
   $('ratio').addEventListener('change',()=>{state.ratio=$('ratio').value;draw();});
   function applyTracePalette(){
     const p=traced.palette;state.background=p.background;state.glyph=p.glyph;state.transparent=false;
@@ -389,6 +375,18 @@
   }
   $('reset-graph').addEventListener('click',()=>{for(const k of Object.keys(defaults))if(k.startsWith('graph'))state[k]=defaults[k];draw();});
   document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.defaultPrevented&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!document.activeElement.closest('.dialkit-root,[contenteditable="true"],[role="listbox"],[role="menu"],[role="dialog"]')&&!['INPUT','SELECT','TEXTAREA','BUTTON','A'].includes(document.activeElement.tagName)){e.preventDefault();generate();}});
+  let copyFeedbackTimer;
+  $('copy-svg').addEventListener('click',async()=>{
+    const button=$('copy-svg');clearTimeout(copyFeedbackTimer);
+    try{
+      // Render before awaiting so the click still counts as the user gesture the clipboard needs.
+      const svg=render(null,{...state},state.resolution,true);
+      await navigator.clipboard.writeText(svg);
+      button.dataset.state='done';button.setAttribute('aria-label','SVG copied');
+      $('render-status').textContent=`SVG copied · ${Math.max(1,Math.round(svg.length/1024))} KB`;
+    }catch(error){console.error(error);$('render-status').textContent='Could not copy. Use Export with SVG instead.';}
+    copyFeedbackTimer=setTimeout(()=>{button.dataset.state='idle';button.setAttribute('aria-label','Copy as SVG');},1600);
+  });
   let exportFeedbackTimer;
   $('download').addEventListener('click',async()=>{
     const button=$('download'),formatControl=$('export-format'),restoreFocus=document.activeElement===$('download');
@@ -402,14 +400,16 @@
         const canvas=document.createElement('canvas');render(canvas,exportState,exportState.resolution);
         blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG encoding failed');
       }
-      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=exportState.mode==='graph'?`glyph-field-graph-${exportState.graphProfile}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`:`glyph-field-${exportState.form}${exportState.form==='spiral'?'':exportState.form==='circles'?'-'+exportState.circleLayout+'-'+exportState.circleStyle:exportState.shape==='freeform'?'':'-'+exportState.shape}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=exportState.mode==='graph'?`glyph-field-graph-${exportState.graphProfile}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`:`glyph-field-${exportState.form}${exportState.form==='circles'?'-'+exportState.circleLayout+'-'+exportState.circleStyle:exportState.shape==='freeform'?'':'-'+exportState.shape}-${exportState.seed.replace(/[^a-z0-9_-]/gi,'_')}-${exportState.resolution}${exportState.transparent?'-transparent':''}.${format}`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
       button.dataset.state='done';button.setAttribute('aria-label','Exported artwork');
       if(revision===exportRevision)$('render-status').textContent=format.toUpperCase()+' exported · '+(exportState.transparent?'Transparent · ':'')+(format==='svg'?'Scalable vector':sizeFor(ratioOf(exportState),exportState.resolution).join(' × '));
     }catch(error){button.dataset.state='idle';$('render-status').textContent='Export failed. Please try again.';console.error(error);}
     finally{button.disabled=false;formatControl.disabled=false;button.removeAttribute('aria-busy');button.setAttribute('aria-label','Export artwork');if(restoreFocus&&document.activeElement===document.body)button.focus({preventScroll:true});exportFeedbackTimer=setTimeout(()=>{button.dataset.state='idle';},1600);}
   });
-  function valid(s){return s&&Object.hasOwn(names,s.form)&&TRACE_CONTROLS.every(([,k,min,max])=>s[k]===undefined||(Number.isInteger(s[k])&&s[k]>=min&&s[k]<=max))&&(s.mode===undefined||['field','graph'].includes(s.mode))&&GRAPH_CONTROLS.every(([,k,min,max])=>s[k]===undefined||(Number.isInteger(s[k])&&s[k]>=min&&s[k]<=max))&&GRAPH_SELECTS.every(([,k,options])=>s[k]===undefined||options.includes(s[k]))&&SERIES.every(k=>s[k]===undefined||/^#[a-f0-9]{6}$/i.test(s[k]))&&SPIRAL_CONTROLS.every(([,k,min,max])=>s[k]===undefined||(Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max))&&(s.spiralArms===undefined||Number.isInteger(s.spiralArms))&&(s.spiralDirection===undefined||['clockwise','counterclockwise'].includes(s.spiralDirection))&&(s.circleLayout===undefined||Object.hasOwn(arrangements,s.circleLayout))&&(s.circleStyle===undefined||['rings','discs','concentric'].includes(s.circleStyle))&&[['circleSize',20,100],['circleSpacing',0,80]].every(([k,min,max])=>s[k]===undefined||(Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max))&&(s.shape===undefined||Object.hasOwn(shapeNames,s.shape))&&(s.shapeFill===undefined||['pattern','solid'].includes(s.shapeFill))&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&(s.transparent===undefined||typeof s.transparent==='boolean')&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
-  try{const saved=JSON.parse(localStorage.getItem('glyph-field-v1'));if(valid(saved?.state))state={...defaults,...saved.state};if(['png','svg'].includes(saved?.exportFormat))exportFormat=saved.exportFormat;
+  function valid(s){return s&&Object.hasOwn(names,s.form)&&TRACE_CONTROLS.every(([,k,min,max])=>s[k]===undefined||(Number.isInteger(s[k])&&s[k]>=min&&s[k]<=max))&&(s.mode===undefined||['field','graph'].includes(s.mode))&&GRAPH_CONTROLS.every(([,k,min,max])=>s[k]===undefined||(Number.isInteger(s[k])&&s[k]>=min&&s[k]<=max))&&GRAPH_SELECTS.every(([,k,options])=>s[k]===undefined||options.includes(s[k]))&&SERIES.every(k=>s[k]===undefined||/^#[a-f0-9]{6}$/i.test(s[k]))&&(s.circleLayout===undefined||Object.hasOwn(arrangements,s.circleLayout))&&(s.circleStyle===undefined||['rings','discs','concentric'].includes(s.circleStyle))&&[['circleSize',20,100],['circleSpacing',0,80]].every(([k,min,max])=>s[k]===undefined||(Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max))&&(s.shape===undefined||Object.hasOwn(shapeNames,s.shape))&&(s.shapeFill===undefined||['pattern','solid'].includes(s.shapeFill))&&typeof s.seed==='string'&&s.seed.length<=24&&['4:5','1:1','16:9','9:16'].includes(s.ratio)&&[2048,4096].includes(s.resolution)&&/^#[a-f0-9]{6}$/i.test(s.color)&&(s.transparent===undefined||typeof s.transparent==='boolean')&&['background','glyph'].every(key=>s[key]===undefined||/^#[a-f0-9]{6}$/i.test(s[key]))&&[['scale',10,90],['density',20,80],['detail',6,16],['accent',0,100]].every(([k,min,max])=>Number.isFinite(s[k])&&s[k]>=min&&s[k]<=max);}
+  try{const saved=JSON.parse(localStorage.getItem('glyph-field-v1'));
+    if(saved?.state){if(saved.state.form==='spiral')saved.state.form=defaults.form;for(const k of Object.keys(saved.state))if(k.startsWith('spiral'))delete saved.state[k];}
+    if(valid(saved?.state))state={...defaults,...saved.state};if(['png','svg'].includes(saved?.exportFormat))exportFormat=saved.exportFormat;
     const savedMotion=saved?.motionSettings,t=savedMotion?.transition;
     if(typeof savedMotion?.enabled==='boolean'&&t&&['spring','easing'].includes(t.type)){
       const numericKeys=['visualDuration','bounce','stiffness','damping','mass','duration'];
