@@ -375,13 +375,21 @@
   }
   $('reset-graph').addEventListener('click',()=>{for(const k of Object.keys(defaults))if(k.startsWith('graph'))state[k]=defaults[k];draw();});
   document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.defaultPrevented&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!document.activeElement.closest('.dialkit-root,[contenteditable="true"],[role="listbox"],[role="menu"],[role="dialog"]')&&!['INPUT','SELECT','TEXTAREA','BUTTON','A'].includes(document.activeElement.tagName)){e.preventDefault();generate();}});
+  // Copy from a hidden textarea first: it only needs the click, while the async
+  // Clipboard API can be denied by a permission even inside a click.
+  function copyWithSelection(text,returnFocus){
+    const area=document.createElement('textarea');area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none';
+    document.body.append(area);area.focus({preventScroll:true});area.select();
+    let copied=false;try{copied=document.execCommand('copy');}catch{/* Falls through to the Clipboard API. */}
+    area.remove();returnFocus.focus({preventScroll:true});return copied;
+  }
   let copyFeedbackTimer;
   $('copy-svg').addEventListener('click',async()=>{
     const button=$('copy-svg');clearTimeout(copyFeedbackTimer);
     try{
-      // Render before awaiting so the click still counts as the user gesture the clipboard needs.
       const svg=render(null,{...state},state.resolution,true);
-      await navigator.clipboard.writeText(svg);
+      if(!copyWithSelection(svg,button))await navigator.clipboard.writeText(svg);
       button.dataset.state='done';button.setAttribute('aria-label','SVG copied');
       $('render-status').textContent=`SVG copied · ${Math.max(1,Math.round(svg.length/1024))} KB`;
     }catch(error){console.error(error);$('render-status').textContent='Could not copy. Use Export with SVG instead.';}
