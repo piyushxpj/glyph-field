@@ -6,14 +6,14 @@
   const descriptions={trace:'Rebuilt from your uploaded image',mycelium:'Branching networks',islands:'Scattered landforms',ribbons:'Winding channels',contours:'Nested elevations',cells:'Organic membranes',circles:'Repeating circular motifs',blob:'Single organic form',wave:'Flowing ribbon',tendril:'Confined branches',cluster:'Scattered fragments'};
   const {names:shapeNames,geometry:shapeGeometry,arrangements,circlePattern}=GlyphShapes;
   const {profileNames,palettes:graphPalettes,draw:drawGraph}=GlyphGraph;
-  const compositionName=s=>s.mode==='graph'?`Graph · ${profileNames[s.graphProfile]}`:s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
+  const compositionName=s=>s.mode!=='graph'&&s.form==='trace'&&preset&&traced?`Preset · ${traced.name}`:s.mode==='graph'?`Graph · ${profileNames[s.graphProfile]}`:s.form==='circles'?`Circles · ${arrangements[s.circleLayout||'grid']}`:s.shape&&s.shape!=='freeform'?`${shapeNames[s.shape]} · ${names[s.form]}`:names[s.form];
   const defaults = {form:'mycelium',circleLayout:'grid',circleStyle:'rings',circleSize:60,circleSpacing:28,shape:'freeform',shapeFill:'pattern',seed:'781204',scale:50,density:48,detail:9,accent:35,color:'#eeeeee',background:'#181818',glyph:'#dbdbdb',transparent:false,ratio:'4:5',resolution:2048,
     mode:'field',graphStyle:'glyph',graphProfile:'peaks',graphLayout:'row',graphDither:'bayer',graphCell:'gapped',graphEdge:'glow',graphSeries:1,graphGap:30,graphHeight:55,graphRough:30,graphPixel:6,graphFade:35,graphStars:30,
     series1:'#dbdbdb',series2:'#9c9c9c',series3:'#ededed',series4:'#7c7c7c',traceStep:9,traceThreshold:14,traceSmooth:95,traceEdge:100};
   const TRACE_CONTROLS=[['step','traceStep',4,32],['threshold','traceThreshold',2,60],['smooth','traceSmooth',30,200],['edge','traceEdge',40,160]];
   let comparing=false;
   // The uploaded image lives only in memory; a saved "trace" form without it falls back to a pattern.
-  let traced=null;
+  let traced=null,preset=null;
   const ratioOf=s=>s.form==='trace'&&traced&&s.mode!=='graph'?traced.ratio:s.ratio;
   const GRAPH_CONTROLS=[['series','graphSeries',1,4],['gap','graphGap',0,80],['height','graphHeight',20,90],['rough','graphRough',0,100],['pixel','graphPixel',3,14],['fade','graphFade',0,100],['stars','graphStars',0,100]];
   const GRAPH_SELECTS=[['graph-style','graphStyle',['glyph','pixel']],['graph-profile','graphProfile',Object.keys(profileNames)],['graph-layout','graphLayout',['row','stack']],['graph-dither','graphDither',['bayer','scatter','halftone']],['graph-cell','graphCell',['square','gapped','dot']],['graph-edge','graphEdge',['glow','solid','none']]];
@@ -292,7 +292,7 @@
     $('art-title').textContent=compositionName(state);$('seed-display').textContent=state.seed;
     $('dimensions').textContent=sizeFor(ratioOf(state),state.resolution).join(' × ');
     art.parentElement.style.setProperty('--art-ratio',ratioOf(state).replace(':',' / '));
-    const tracing=state.form==='trace'&&!!traced;
+    const tracing=state.form==='trace'&&!!traced;syncPresets();
     selection.style.display=tracing?'none':'';
     $('trace-loaded').hidden=!traced;$('trace-settings').hidden=!tracing;$('trace-use').hidden=!traced||tracing;
     $('trace-upload').textContent=traced?'Upload another image':'Upload image';
@@ -328,17 +328,28 @@
     const p=traced.palette;state.background=p.background;state.glyph=p.glyph;state.transparent=false;
     if(p.accent){state.color=p.accent;if(!state.accent)state.accent=defaults.accent;}else state.accent=0;
   }
-  async function loadTrace(file){
+  // Presets are studio pieces traced back into a field, so every control applies to them.
+  function syncPresets(){for(const b of document.querySelectorAll('.preset'))b.setAttribute('aria-pressed',String(!!traced&&state.form==='trace'&&b.dataset.preset===preset));}
+  async function loadTrace(file,fromPreset=null){
     if(!file||!/^image\//.test(file.type)){$('render-status').textContent='Choose a PNG, JPG, or WebP image.';return;}
     $('render-status').textContent='Reading image…';
     try{
       const next=await GlyphTrace.analyze(file,sizeFor);
       if(traced)URL.revokeObjectURL(traced.src);
-      traced=next;
+      traced=next;preset=fromPreset;
       Object.assign(state,{mode:'field',form:'trace',traceStep:traced.step,traceThreshold:defaults.traceThreshold,traceSmooth:defaults.traceSmooth,traceEdge:defaults.traceEdge,shape:'freeform'});
       applyTracePalette();draw();
     }catch(error){console.error(error);$('render-status').textContent=error.message.startsWith('No glyphs')?error.message:'Could not read this image.';}
   }
+  for(const button of document.querySelectorAll('.preset'))button.addEventListener('click',async()=>{
+    if(button.getAttribute('aria-busy')==='true')return;
+    button.setAttribute('aria-busy','true');$('render-status').textContent='Opening preset…';
+    try{
+      const blob=await (await fetch('presets/'+button.dataset.preset)).blob();
+      await loadTrace(new File([blob],button.dataset.name,{type:blob.type}),button.dataset.preset);
+    }catch(error){console.error(error);$('render-status').textContent='Could not open this preset.';}
+    finally{button.removeAttribute('aria-busy');}
+  });
   $('trace-upload').addEventListener('click',()=>$('trace-file').click());
   $('trace-file').addEventListener('change',()=>{loadTrace($('trace-file').files[0]);$('trace-file').value='';});
   $('trace-use').addEventListener('click',()=>{state.mode='field';state.form='trace';draw();});

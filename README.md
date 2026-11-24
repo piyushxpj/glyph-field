@@ -23,7 +23,9 @@ Then open http://localhost:4187. To change the React UI or rebuild bundles, see 
 
 ## Layout
 
-The canvas sits on the left and the inspector on the right, with **Pattern**, **Colors**, and **Canvas** tabs. Under the canvas, a dock holds **Shuffle**, **Copy SVG**, the export format, and **Export**. On phones the controls stack below the canvas.
+A **Presets** panel sits on the left, the canvas in the middle, and the inspector on the right, with **Pattern**, **Colors**, and **Canvas** tabs. Under the canvas, a dock holds **Shuffle**, **Copy SVG**, the export format, and **Export**. On narrower screens the presets move under the canvas; on phones the presets and controls stack below it.
+
+**Presets** are four pieces made in the studio earlier: Veil, Rings, Moss, and Network. Selecting one opens it through **From image**, with its colors and glyph size detected, so every control can then reshape it.
 
 ## Field mode
 
@@ -96,6 +98,7 @@ The renderer creates seeded, domain-warped noise fields, classifies foreground c
 - `style.css` — responsive layout
 - `shapes.js` — shared geometry for canvas clipping and scalable SVG paths
 - `trace.js` — reads an uploaded image back into a field: background and accent detection, glyph-size estimate, and a coverage mask
+- `presets/` — the four preset images and their panel thumbnails; `build-static.mjs` copies the folder
 - `graph.js` — graph curves, series layout, the pixel-dither renderer, and the mask that feeds glyph-style graphs into the field renderer
 - `app.js` — seeded renderer, export, saved settings, DialKit binding, and Motion feedback
 - `vendor/` — local DialKit 2.2.0 and Motion 14.12.0 browser bundles, styles, and licenses

@@ -7,7 +7,7 @@
   <title>Glyph Field — ASCII image studio</title>
   <link rel="stylesheet" href="vendor/dialkit.css">
   <link rel="stylesheet" href="vendor/ui.css">
-  <link rel="stylesheet" href="style.css?v=studio-21">
+  <link rel="stylesheet" href="style.css?v=studio-23">
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +20,11 @@
     <select id="export-format" hidden aria-hidden="true" tabindex="-1"><option value="png">PNG</option><option value="svg">SVG</option></select>
   </header>
   <main>
+    <aside class="presets" aria-label="Presets">
+      <div class="section-heading"><h2>Presets</h2><span>04</span></div>
+      <p class="presets-note">Open one, then tweak every control.</p>
+      <div class="preset-list"><button type="button" class="preset" data-preset="veil.webp" data-name="Veil"><img src="presets/veil-thumb.webp" alt="" width="200" height="108" loading="lazy"><span class="preset-caption"><strong>Veil</strong><small>Gray · violet</small></span></button><button type="button" class="preset" data-preset="rings.png" data-name="Rings"><img src="presets/rings-thumb.webp" alt="" width="200" height="108" loading="lazy"><span class="preset-caption"><strong>Rings</strong><small>Ochre circles</small></span></button><button type="button" class="preset" data-preset="moss.webp" data-name="Moss"><img src="presets/moss-thumb.webp" alt="" width="200" height="108" loading="lazy"><span class="preset-caption"><strong>Moss</strong><small>Green field</small></span></button><button type="button" class="preset" data-preset="network.webp" data-name="Network"><img src="presets/network-thumb.webp" alt="" width="200" height="108" loading="lazy"><span class="preset-caption"><strong>Network</strong><small>Violet threads</small></span></button></div>
+    </aside>
     <section class="workspace" aria-label="Image preview">
       <div class="preview-top"><div><span id="art-title">MYCELIUM</span><span class="slash">/</span><span class="seed-prefix">Seed</span><span id="seed-display">781204</span></div><span id="dimensions">1638 × 2048</span></div>
       <div class="art-stage"><div id="transparency-grid" aria-hidden="true"></div><img id="trace-overlay" class="trace-overlay" alt="" aria-hidden="true" hidden><canvas id="art" width="800" height="1000" role="img" aria-label="Generated organic ASCII artwork with white and gray glyphs on charcoal"></canvas></div>
@@ -141,6 +146,6 @@
   <script src="shapes.js"></script>
   <script src="graph.js?v=studio-20"></script>
   <script src="trace.js?v=studio-20"></script>
-  <script src="app.js?v=studio-22"></script>
+  <script src="app.js?v=studio-23"></script>
 </body>
 </html>
